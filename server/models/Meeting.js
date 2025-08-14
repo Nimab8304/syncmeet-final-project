@@ -35,6 +35,11 @@ const meetingSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    archived: {
+    type: Boolean,
+    default: false,
+    }
+
     // You can add additional fields like location, recurrence, reminders etc.
   },
   {
