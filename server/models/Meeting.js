@@ -20,7 +20,9 @@ const meetingSchema = new mongoose.Schema(
     participants: [participantSchema],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     archived: { type: Boolean, default: false },
-    // Add future fields like location, recurrence, reminders here
+
+    // New: store the created Google event id for future updates/deletes
+    googleEventId: { type: String, default: null },
   },
   { timestamps: true }
 );

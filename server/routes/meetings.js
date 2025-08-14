@@ -4,6 +4,9 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const {
   createMeeting,
+  updateMeeting,
+  deleteMeeting,
+  syncMeetingToGoogle,
   getMeetingsForUser,
   respondToInvitation,
   archivePastMeetings,
@@ -12,10 +15,28 @@ const {
 
 router.use(authMiddleware);
 
+// Create a new meeting
 router.post('/', createMeeting);
+
+// Update a meeting (creator only)
+router.put('/:id', updateMeeting);
+
+// Delete a meeting (creator only)
+router.delete('/:id', deleteMeeting);
+
+// Manually sync a meeting to Google (creator only)
+router.post('/:id/sync-google', syncMeetingToGoogle);
+
+// Get meetings for logged-in user (active)
 router.get('/', getMeetingsForUser);
+
+// Respond to invitation
 router.post('/:meetingId/respond', respondToInvitation);
+
+// Archive past meetings
 router.post('/archive-past', archivePastMeetings);
+
+// Get archived meetings
 router.get('/archived', getArchivedMeetings);
 
 module.exports = router;
