@@ -78,7 +78,8 @@ const respondToInvitation = async (req, res) => {
   }
 };
 
-// Archive past meetings (mark as archived based on endTime)
+
+
 const archivePastMeetings = async (req, res) => {
   try {
     const now = new Date();
