@@ -37,8 +37,8 @@ const getMeetingsForUser = async (req, res) => {
         { 'participants.user': userId },
       ],
     })
-    .populate('participants.user', 'name email') // Get participant user details
-    .populate('createdBy', 'name email') // Get creator info
+    .populate('participants.user', 'name email')
+    .populate('createdBy', 'name email')
     .sort({ startTime: 1 });
 
     res.json(meetings);
@@ -52,7 +52,7 @@ const respondToInvitation = async (req, res) => {
   try {
     const userId = req.user.id;
     const { meetingId } = req.params;
-    const { response } = req.body; // Expected: 'accepted' or 'declined'
+    const { response } = req.body;
 
     if (!['accepted', 'declined'].includes(response)) {
       return res.status(400).json({ message: 'Invalid response value' });
@@ -64,7 +64,6 @@ const respondToInvitation = async (req, res) => {
       return res.status(404).json({ message: 'Meeting not found' });
     }
 
-    // Find the participant and update the status
     const participant = meeting.participants.find(p => p.user.toString() === userId);
     if (!participant) {
       return res.status(403).json({ message: 'You are not invited to this meeting' });
@@ -79,6 +78,7 @@ const respondToInvitation = async (req, res) => {
   }
 };
 
+// Archive past meetings (mark as archived based on endTime)
 const archivePastMeetings = async (req, res) => {
   try {
     const now = new Date();
@@ -93,6 +93,7 @@ const archivePastMeetings = async (req, res) => {
   }
 };
 
+// Get archived meetings for the logged-in user
 const getArchivedMeetings = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -107,9 +108,10 @@ const getArchivedMeetings = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createMeeting,
   getMeetingsForUser,
-  respondToInvitation
+  respondToInvitation,
+  archivePastMeetings,
+  getArchivedMeetings
 };

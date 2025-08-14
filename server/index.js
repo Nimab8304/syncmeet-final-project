@@ -23,6 +23,9 @@ const userRoutes = require('./routes/users');
 // Add after app.use(express.json());
 app.use('/api/users', userRoutes);
 
+const meetingRoutes = require('./routes/meetings');
+app.use('/api/meetings', meetingRoutes);
+
 const googleCalendarRoutes = require('./routes/googleCalendar');
 app.use('/api/google-calendar', googleCalendarRoutes);
 
