@@ -12,7 +12,7 @@ connectDB();
 const app = express();
 
 // Core middlewares
-app.use(cors()); // For dev you allow all; restrict origin in prod with { origin: 'https://your-app' }
+app.use(cors()); // For dev allow all; restrict origin in prod with { origin: 'https://your-app' }
 app.use(helmet()); // Sensible security headers
 app.use(express.json({ limit: '1mb' })); // Prevent overly large JSON payloads
 
@@ -36,7 +36,10 @@ app.use('/api/users', authLimiter, userRoutes);
 const googleCalendarRoutes = require('./routes/googleCalendar');
 app.use('/api/google-calendar', googleCalendarRoutes);
 
-// Not found handler (optional, before error handler)
+const meetingRoutes = require('./routes/meetings');
+app.use('/api/meetings', meetingRoutes);
+
+// Not found handler (before error handler)
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });
 });

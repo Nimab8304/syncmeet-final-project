@@ -10,16 +10,17 @@ function createOAuth2Client() {
   const { client_id, client_secret, redirect_uris } = cfg;
   if (!client_id || !client_secret || !redirect_uris || !redirect_uris.length) {
     throw new Error('Google credentials missing client_id/client_secret/redirect_uris.');
-    }
+  }
   return new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 }
 
-function getAuthUrl(scopes = []) {
+function getAuthUrl(scopes = [], state) {
   const client = createOAuth2Client();
   return client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: scopes,
+    state, // attach signed state token
   });
 }
 
@@ -36,7 +37,6 @@ async function getAuthedClientForUser(userId) {
     expiry_date: me.google.expiryDate || undefined,
   });
 
-  // Refresh if expired and refreshToken is present
   const now = Date.now();
   if (me.google.expiryDate && me.google.expiryDate <= now && me.google.refreshToken) {
     const { credentials } = await client.refreshAccessToken();
