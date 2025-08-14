@@ -1,18 +1,18 @@
 import React from 'react';
 import RegisterForm from '../components/auth/RegisterForm';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function RegisterPage() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
   const handleRegister = async ({ name, email, password }) => {
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      if (!response.ok) throw new Error('Registration failed');
-      const data = await response.json();
+      await register({ name, email, password });
       alert('Registration successful! Please login.');
-      // Optionally redirect to login page
+      // Redirect to login page after successful registration
+      navigate('/login');
     } catch (error) {
       alert(error.message);
     }
