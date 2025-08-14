@@ -23,6 +23,9 @@ const userRoutes = require('./routes/users');
 // Add after app.use(express.json());
 app.use('/api/users', userRoutes);
 
+const googleCalendarRoutes = require('./routes/googleCalendar');
+app.use('/api/google-calendar', googleCalendarRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Server is listening on port ${PORT}`);
 });
