@@ -1,4 +1,4 @@
-const API_URL = '/api/meetings';
+const API_URL = 'http://localhost:5000/api/meetings';
 
 // Fetch all meetings for the current user
 export const getMeetings = async (token) => {
