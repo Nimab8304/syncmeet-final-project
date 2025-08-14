@@ -1,11 +1,16 @@
 // client/src/services/meetingService.js
-const BASE_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, ""); // trim trailing slashes
+const BASE_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 const API = `${BASE_URL}/api/meetings`;
 
 const authHeaders = (token) => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}`,
 });
+
+function extractMessage(data, fallback) {
+  if (!data) return fallback;
+  return data.message || data.msg || fallback;
+}
 
 async function request(path = "", { token, ...options } = {}) {
   const res = await fetch(`${API}${path}`, {
@@ -20,7 +25,7 @@ async function request(path = "", { token, ...options } = {}) {
   const data = isJson ? await res.json().catch(() => ({})) : null;
 
   if (!res.ok) {
-    const err = new Error(data?.message || `Request failed: ${res.status}`);
+    const err = new Error(extractMessage(data, `Request failed: ${res.status}`));
     err.status = res.status;
     throw err;
   }

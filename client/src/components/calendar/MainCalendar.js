@@ -2,7 +2,6 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-// If needed, uncomment v6 CSS imports in your project setup:
 // import "@fullcalendar/core/index.css";
 // import "@fullcalendar/daygrid/index.css";
 

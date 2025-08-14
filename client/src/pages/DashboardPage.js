@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import MainCalendar from "../components/calendar/MainCalendar";
 import MeetingForm from "../components/calendar/MeetingForm";
+import MeetingFormModal from "../components/calendar/MeetingFormModal";
+import MeetingDetailsModal from "../components/calendar/MeetingDetailsModal";
 import EmptyState from "../components/ui/EmptyState";
 import InvitationList from "../components/calendar/InvitationList";
 import UpcomingList from "../components/calendar/UpcomingList";
@@ -10,19 +12,32 @@ import {
   getMeetings,
   createMeeting,
   respondToInvitation,
+  // TODO: add updateMeeting, deleteMeeting if backend supports
 } from "../services/meetingService";
 import { useNavigate } from "react-router-dom";
 import { eventColorsForOwnership } from "../utils/colors";
 import { formatLocalRange } from "../utils/date";
+import {
+  requestNotificationPermission,
+  scheduleMeetingReminder,
+  clearAllReminders,
+} from "../services/notificationService";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [events, setEvents] = useState([]);
-  const [rawMeetings, setRawMeetings] = useState([]); // keep original meetings for lists
+  const [rawMeetings, setRawMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+
+  // Modals state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editInit, setEditInit] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsMeeting, setDetailsMeeting] = useState(null);
+  const [detailsIsOwner, setDetailsIsOwner] = useState(false);
 
   const currentUserId = useMemo(
     () => user?.id || user?._id || user?.userId || user?.user?.id,
@@ -37,6 +52,30 @@ export default function DashboardPage() {
     }
   }, [logout, navigate]);
 
+  // Ask notification permission once (best effort; non-blocking)
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  const DEFAULT_REMINDER_MINUTES = 15;
+
+  // Schedule reminders for a set of meetings (future only)
+  const scheduleRemindersForMeetings = useCallback((meetings) => {
+    clearAllReminders();
+    const now = Date.now();
+    (meetings || [])
+      .filter((m) => new Date(m.startTime).getTime() > now)
+      .forEach((m) => {
+        const minutes =
+          typeof m.reminderMinutes === "number"
+            ? m.reminderMinutes
+            : DEFAULT_REMINDER_MINUTES;
+        if (minutes > 0) {
+          scheduleMeetingReminder(m, minutes);
+        }
+      });
+  }, []);
+
   const loadMeetings = useCallback(async () => {
     if (!user?.token) return;
     setLoading(true);
@@ -44,7 +83,6 @@ export default function DashboardPage() {
     try {
       const meetings = await getMeetings(user.token);
 
-      // Prepare calendar events
       const calendarEvents = meetings.map((m) => {
         const createdById =
           typeof m.createdBy === "string" ? m.createdBy : m.createdBy?._id;
@@ -70,6 +108,9 @@ export default function DashboardPage() {
 
       setRawMeetings(meetings);
       setEvents(calendarEvents);
+
+      // Schedule reminders after loading
+      scheduleRemindersForMeetings(meetings);
     } catch (err) {
       if (err?.status === 401 || err?.status === 403) {
         safeLogout();
@@ -79,22 +120,30 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentUserId, safeLogout]);
+  }, [user, currentUserId, safeLogout, scheduleRemindersForMeetings]);
 
   useEffect(() => {
     loadMeetings();
   }, [loadMeetings]);
 
+  // Cleanup all reminders on unmount
+  useEffect(() => {
+    return () => clearAllReminders();
+  }, []);
+
   // Invitations list: meetings where current user is a participant and status === 'invited'
   const invitations = useMemo(() => {
     if (!rawMeetings?.length || !currentUserId) return [];
     return rawMeetings
-      .filter((m) =>
-        Array.isArray(m.participants) &&
-        m.participants.some((p) => String(p.user) === String(currentUserId))
+      .filter(
+        (m) =>
+          Array.isArray(m.participants) &&
+          m.participants.some((p) => String(p.user) === String(currentUserId))
       )
       .map((m) => {
-        const me = (m.participants || []).find((p) => String(p.user) === String(currentUserId));
+        const me = (m.participants || []).find(
+          (p) => String(p.user) === String(currentUserId)
+        );
         return { ...m, status: me?.status || "invited" };
       })
       .filter((m) => m.status === "invited");
@@ -110,46 +159,71 @@ export default function DashboardPage() {
   }, [rawMeetings]);
 
   const handleCreateMeeting = async (meetingData) => {
-    try {
-      await createMeeting(meetingData, user.token);
-      await loadMeetings(); // refresh calendar and side lists
-    } catch (err) {
-      if (err?.status === 401 || err?.status === 403) {
-        safeLogout();
-      }
-      throw err; // let form show error
-    }
+    await createMeeting(meetingData, user.token);
+    await loadMeetings(); // refresh and reschedule reminders
   };
 
   const handleRespond = async (meetingId, response) => {
     try {
       await respondToInvitation(meetingId, response, user.token);
-      // Optimistic update: refresh all
-      await loadMeetings();
+      await loadMeetings(); // refresh and reschedule reminders
+      setDetailsOpen(false);
     } catch (err) {
       if (err?.status === 401 || err?.status === 403) {
         safeLogout();
       }
-      // Optionally show toast/error UI here
-      console.error("Failed to respond to invitation:", err);
     }
   };
 
   const handleDateClick = (arg) => {
-    // Placeholder; will open create modal in next steps
-    alert(`Date clicked: ${arg.dateStr}`);
+    // Prefill times in create modal (+1h)
+    const startISO = new Date(arg.date).toISOString();
+    const endISO = new Date(new Date(arg.date).getTime() + 60 * 60 * 1000).toISOString();
+    setEditInit({
+      title: "",
+      description: "",
+      startTime: startISO,
+      endTime: endISO,
+      invitationLink: "",
+    });
+    setCreateOpen(true);
   };
 
   const handleEventClick = (info) => {
     const m = info?.event?.extendedProps?.meeting;
-    const timeLabel = info?.event?.extendedProps?.timeLabel;
-    alert(`${m?.title || info.event.title}\n${timeLabel || ""}`);
-    // Next steps: open details modal with actions
+    const isOwner = !!info?.event?.extendedProps?.isOwner;
+    setDetailsMeeting(m);
+    setDetailsIsOwner(isOwner);
+    setDetailsOpen(true);
+  };
+
+  const handleEditFromDetails = (meeting) => {
+    // Open create/edit modal with initial values (acts as edit UI until update API exists)
+    setEditInit(meeting);
+    setCreateOpen(true);
+    setDetailsOpen(false);
   };
 
   return (
     <div className="container">
-      <h1 style={{ marginBottom: 12 }}>Dashboard</h1>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <h1 style={{ marginBottom: 12 }}>Dashboard</h1>
+        <button
+          onClick={() => {
+            setEditInit(null);
+            setCreateOpen(true);
+          }}
+        >
+          + New Meeting
+        </button>
+      </div>
 
       <div className="grid grid-2">
         {/* Left: Calendar */}
@@ -165,8 +239,8 @@ export default function DashboardPage() {
               action={{
                 label: "Create meeting",
                 onClick: () => {
-                  const el = document.getElementById("meeting-form");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  setEditInit(null);
+                  setCreateOpen(true);
                 },
               }}
             />
@@ -179,28 +253,51 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right: Invitations, Upcoming, New Meeting */}
+        {/* Right: Invitations, Upcoming, inline form (optional keep) */}
         <div>
           <InvitationList invitations={invitations} onRespond={handleRespond} />
           <UpcomingList meetings={upcoming} limit={5} />
 
           <div className="card" style={{ marginTop: 16 }}>
-            <h2 className="section-title">New Meeting</h2>
+            <h2 className="section-title">New Meeting (inline)</h2>
             <div id="meeting-form">
-              <MeetingForm onCreate={handleCreateMeeting} />
+              <MeetingForm
+                onCreate={async (data) => {
+                  await handleCreateMeeting(data);
+                }}
+              />
             </div>
-          </div>
-
-          <div className="card" style={{ marginTop: 16 }}>
-            <h2 className="section-title">Tips</h2>
-            <ul style={{ color: "#374151", lineHeight: 1.7 }}>
-              <li>• Accept or decline invitations from the right panel.</li>
-              <li>• Owner events are highlighted with a primary color.</li>
-              <li>• Use Archive to move past meetings out of the main calendar.</li>
-            </ul>
           </div>
         </div>
       </div>
+
+      {/* Details modal */}
+      <MeetingDetailsModal
+        open={detailsOpen}
+        meeting={detailsMeeting}
+        isOwner={detailsIsOwner}
+        onClose={() => setDetailsOpen(false)}
+        onAccept={(id) => handleRespond(id, "accepted")}
+        onDecline={(id) => handleRespond(id, "declined")}
+        onEdit={handleEditFromDetails}
+        // onDelete={async (id) => { /* TODO: implement deleteMeeting then refresh */ }}
+      />
+
+      {/* Create/Edit modal */}
+      <MeetingFormModal
+        open={createOpen}
+        onClose={() => {
+          setCreateOpen(false);
+          setEditInit(null);
+        }}
+        onSubmit={async (payload) => {
+          // If you add updateMeeting API, detect editInit?._id and branch to update
+          await handleCreateMeeting(payload);
+        }}
+        initialValues={editInit}
+        title={editInit && editInit._id ? "Edit meeting" : "Create meeting"}
+        defaultReminderMinutes={15}
+      />
     </div>
   );
 }
