@@ -2,11 +2,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db'); // فعلا کامنت باشد تا بعد
+const connectDB = require('./config/db'); 
+connectDB();
 
 const app = express();
-
-connectDB()
 
 // Middlewares
 app.use(cors());
@@ -23,6 +22,12 @@ const userRoutes = require('./routes/users');
 
 // Add after app.use(express.json());
 app.use('/api/users', userRoutes);
+
+const meetingRoutes = require('./routes/meetings');
+app.use('/api/meetings', meetingRoutes);
+
+// const googleCalendarRoutes = require('./routes/googleCalendar');
+// app.use('/api/google-calendar', googleCalendarRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is listening on port ${PORT}`);
