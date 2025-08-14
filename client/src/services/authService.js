@@ -1,4 +1,4 @@
-const API_URL = '/api/users';  // Base URL for your backend user API
+const API_URL = 'http://localhost:5000/api/users';  // Base URL for your backend user API
 
 // Register a new user
 export const register = async (userData) => {
