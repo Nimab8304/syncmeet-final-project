@@ -22,11 +22,12 @@ import {
   scheduleMeetingReminder,
   clearAllReminders,
 } from "../services/notificationService";
+import { useToast } from "../App";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
+  const { showToast } = useToast?.() || { showToast: () => {} };
   const [events, setEvents] = useState([]);
   const [rawMeetings, setRawMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -159,9 +160,19 @@ export default function DashboardPage() {
   }, [rawMeetings]);
 
   const handleCreateMeeting = async (meetingData) => {
-    await createMeeting(meetingData, user.token);
-    await loadMeetings(); // refresh and reschedule reminders
+    try {
+      await createMeeting(meetingData, user.token);
+      await loadMeetings();
+      showToast("Meeting created successfully!", "success");
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        safeLogout();
+      } else {
+        showToast(err.message, "error");
+      }
+    }
   };
+
 
   const handleRespond = async (meetingId, response) => {
     try {
@@ -236,6 +247,7 @@ export default function DashboardPage() {
             <EmptyState
               title="No meetings yet"
               description="Create your first meeting to see it on the calendar."
+              hideImage
               action={{
                 label: "Create meeting",
                 onClick: () => {

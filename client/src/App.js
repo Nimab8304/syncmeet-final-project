@@ -1,5 +1,12 @@
 // src/App.js
-import React, { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useRef,
+  useEffect,
+} from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
@@ -9,12 +16,8 @@ import ArchivePage from "./pages/ArchivePage";
 import Navbar from "./components/layout/Navbar";
 import Toast from "./components/ui/Toast";
 
-// Lazy Settings page (fallback placeholder if file not present yet)
-const SettingsPage = React.lazy(() =>
-  import("./pages/SettingsPage").catch(() => ({
-    default: () => <div style={{ padding: 16 }}>Settings coming soon…</div>,
-  }))
-);
+// Lazy Settings page (expects ./pages/SettingsPage to export default)
+const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
 
 // Protected Route
 function ProtectedRoute({ children, redirectTo = "/login" }) {

@@ -1,4 +1,17 @@
+// server/controllers/meetingController.js
 const Meeting = require('../models/Meeting');
+
+// Helper: sanitize participants array to { user, status: invited|accepted|declined }
+function sanitizeParticipants(participants) {
+  if (!Array.isArray(participants)) return [];
+  const allowed = new Set(['invited', 'accepted', 'declined']);
+  return participants
+    .filter((p) => p && p.user)
+    .map((p) => ({
+      user: p.user,
+      status: allowed.has(p.status) ? p.status : 'invited',
+    }));
+}
 
 // Create a new meeting
 const createMeeting = async (req, res) => {
@@ -9,6 +22,9 @@ const createMeeting = async (req, res) => {
     if (!title || !startTime || !endTime) {
       return res.status(400).json({ message: 'Title, startTime and endTime are required' });
     }
+    if (new Date(startTime) >= new Date(endTime)) {
+      return res.status(400).json({ message: 'startTime must be before endTime' });
+    }
 
     const meeting = new Meeting({
       title,
@@ -16,34 +32,33 @@ const createMeeting = async (req, res) => {
       startTime,
       endTime,
       invitationLink,
-      participants,
+      participants: sanitizeParticipants(participants),
       createdBy,
     });
 
     const savedMeeting = await meeting.save();
-    res.status(201).json(savedMeeting);
+    return res.status(201).json(savedMeeting);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
-// Get all meetings for the logged-in user (as participant or creator)
+// Get all active (non-archived) meetings for the logged-in user (as participant or creator)
 const getMeetingsForUser = async (req, res) => {
   try {
     const userId = req.user.id;
-    const meetings = await Meeting.find({
-      $or: [
-        { createdBy: userId },
-        { 'participants.user': userId },
-      ],
-    })
-    .populate('participants.user', 'name email')
-    .populate('createdBy', 'name email')
-    .sort({ startTime: 1 });
 
-    res.json(meetings);
+    const meetings = await Meeting.find({
+      archived: false,
+      $or: [{ createdBy: userId }, { 'participants.user': userId }],
+    })
+      .populate('participants.user', 'name email')
+      .populate('createdBy', 'name email')
+      .sort({ startTime: 1 });
+
+    return res.json(meetings);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
@@ -59,12 +74,19 @@ const respondToInvitation = async (req, res) => {
     }
 
     const meeting = await Meeting.findById(meetingId);
-
     if (!meeting) {
       return res.status(404).json({ message: 'Meeting not found' });
     }
 
-    const participant = meeting.participants.find(p => p.user.toString() === userId);
+    // Prevent responding to archived or past meetings (optional hardening)
+    const now = new Date();
+    if (meeting.archived || new Date(meeting.endTime) < now) {
+      return res.status(400).json({ message: 'Cannot respond to an archived or past meeting' });
+    }
+
+    const participant = (meeting.participants || []).find(
+      (p) => p.user && p.user.toString() === userId
+    );
     if (!participant) {
       return res.status(403).json({ message: 'You are not invited to this meeting' });
     }
@@ -72,25 +94,31 @@ const respondToInvitation = async (req, res) => {
     participant.status = response;
     await meeting.save();
 
-    res.json({ message: `Invitation ${response}` });
+    return res.json({ message: `Invitation ${response}` });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
-
-
+// Archive past meetings
 const archivePastMeetings = async (req, res) => {
   try {
     const now = new Date();
-    const result = await Meeting.updateMany(
-      { endTime: { $lt: now }, archived: false },
-      { $set: { archived: true } }
-    );
 
-    res.json({ message: `${result.modifiedCount} meetings archived.` });
+    // Global archive (original behavior):
+    let filter = { endTime: { $lt: now }, archived: false };
+
+    // Optional: scope to current user only — uncomment to enable scoped archiving
+    // const userId = req.user.id;
+    // filter = {
+    //   ...filter,
+    //   $or: [{ createdBy: userId }, { 'participants.user': userId }],
+    // };
+
+    const result = await Meeting.updateMany(filter, { $set: { archived: true } });
+    return res.json({ message: `${result.modifiedCount} meetings archived.` });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
@@ -101,11 +129,14 @@ const getArchivedMeetings = async (req, res) => {
     const meetings = await Meeting.find({
       archived: true,
       $or: [{ createdBy: userId }, { 'participants.user': userId }],
-    }).sort({ startTime: -1 });
+    })
+      .populate('participants.user', 'name email')
+      .populate('createdBy', 'name email')
+      .sort({ startTime: -1 });
 
-    res.json(meetings);
+    return res.json(meetings);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
@@ -114,5 +145,5 @@ module.exports = {
   getMeetingsForUser,
   respondToInvitation,
   archivePastMeetings,
-  getArchivedMeetings
+  getArchivedMeetings,
 };

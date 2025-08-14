@@ -1,4 +1,6 @@
 // client/src/services/meetingService.js
+import { normalizeError } from "../utils/error";
+
 const BASE_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 const API = `${BASE_URL}/api/meetings`;
 
@@ -13,23 +15,27 @@ function extractMessage(data, fallback) {
 }
 
 async function request(path = "", { token, ...options } = {}) {
-  const res = await fetch(`${API}${path}`, {
-    ...options,
-    headers: {
-      ...(options.headers || {}),
-      ...(token ? authHeaders(token) : {}),
-    },
-  });
+  try {
+    const res = await fetch(`${API}${path}`, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(token ? authHeaders(token) : {}),
+      },
+    });
 
-  const isJson = res.headers.get("content-type")?.includes("application/json");
-  const data = isJson ? await res.json().catch(() => ({})) : null;
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const data = isJson ? await res.json().catch(() => ({})) : null;
 
-  if (!res.ok) {
-    const err = new Error(extractMessage(data, `Request failed: ${res.status}`));
-    err.status = res.status;
-    throw err;
+    if (!res.ok) {
+      const err = new Error(extractMessage(data, `Request failed: ${res.status}`));
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  } catch (err) {
+    throw normalizeError(err);
   }
-  return data;
 }
 
 export const getMeetings = (token) => request("", { token });

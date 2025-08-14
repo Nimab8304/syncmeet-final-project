@@ -2,6 +2,7 @@ import React from 'react';
 import LoginForm from '../components/auth/LoginForm';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import welcomeIllustration from '../assets/welcome-illustration.svg';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -32,15 +33,24 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-        <div className="card" style={{ background: '#fff' }}>
+
+        <div className="card" style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
           <h2 className="section-title">Why SyncMeet?</h2>
-          <ul style={{ lineHeight: 1.8, color: '#374151' }}>
+          <ul style={{ lineHeight: 1.8, color: '#374151', marginBottom: 16 }}>
             <li>• Fast meeting creation with invitations.</li>
             <li>• Color‑coded calendar (owner vs participant).</li>
             <li>• Reminders before meetings.</li>
             <li>• Archive past meetings in one click.</li>
             <li>• Optional Google Calendar sync.</li>
           </ul>
+
+          <div style={{ marginTop: 'auto' }}>
+            <img
+              src={welcomeIllustration}
+              alt="Welcome to SyncMeet"
+              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+            />
+          </div>
         </div>
       </div>
     </div>
