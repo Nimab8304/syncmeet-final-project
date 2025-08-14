@@ -4,7 +4,7 @@ import RegisterForm from '../components/auth/RegisterForm';
 export default function RegisterPage() {
   const handleRegister = async ({ name, email, password }) => {
     try {
-      const response = await fetch('/api/users/register', {
+      const response = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
