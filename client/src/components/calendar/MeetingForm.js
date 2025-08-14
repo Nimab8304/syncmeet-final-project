@@ -1,29 +1,28 @@
 // client/src/components/calendar/MeetingForm.js
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 export default function MeetingForm({ onCreate }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [invitationLink, setInvitationLink] = useState('');
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [invitationLink, setInvitationLink] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!title || !startTime || !endTime) {
-      setError('Title, start time, and end time are required.');
+      setError("Title, start time, and end time are required.");
       return;
     }
-
     if (new Date(startTime) >= new Date(endTime)) {
-      setError('Start time must be before end time.');
+      setError("Start time must be before end time.");
       return;
     }
 
-    // Prepare meeting object for submission
     const meetingData = {
       title,
       description,
@@ -32,23 +31,28 @@ export default function MeetingForm({ onCreate }) {
       invitationLink,
     };
 
-    // Call parent or context callback
-    onCreate(meetingData);
-
-    // Clear form fields after submission
-    setTitle('');
-    setDescription('');
-    setStartTime('');
-    setEndTime('');
-    setInvitationLink('');
+    try {
+      setSubmitting(true);
+      await onCreate(meetingData);
+      // Clear on success
+      setTitle("");
+      setDescription("");
+      setStartTime("");
+      setEndTime("");
+      setInvitationLink("");
+    } catch (err) {
+      setError(err?.message || "Failed to create meeting");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '1em auto' }}>
+    <form onSubmit={handleSubmit} style={{ maxWidth: 420, margin: "1rem auto" }}>
       <h2>Create Meeting</h2>
-      {error && <div style={{ color: 'red', marginBottom: '0.5em' }}>{error}</div>}
+      {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
 
-      <div>
+      <div style={{ marginBottom: 8 }}>
         <label>Title*</label>
         <input
           type="text"
@@ -58,7 +62,7 @@ export default function MeetingForm({ onCreate }) {
         />
       </div>
 
-      <div>
+      <div style={{ marginBottom: 8 }}>
         <label>Description</label>
         <textarea
           value={description}
@@ -66,7 +70,7 @@ export default function MeetingForm({ onCreate }) {
         />
       </div>
 
-      <div>
+      <div style={{ marginBottom: 8 }}>
         <label>Start Time*</label>
         <input
           type="datetime-local"
@@ -76,7 +80,7 @@ export default function MeetingForm({ onCreate }) {
         />
       </div>
 
-      <div>
+      <div style={{ marginBottom: 8 }}>
         <label>End Time*</label>
         <input
           type="datetime-local"
@@ -86,7 +90,7 @@ export default function MeetingForm({ onCreate }) {
         />
       </div>
 
-      <div>
+      <div style={{ marginBottom: 12 }}>
         <label>Invitation Link</label>
         <input
           type="url"
@@ -96,7 +100,9 @@ export default function MeetingForm({ onCreate }) {
         />
       </div>
 
-      <button type="submit">Create Meeting</button>
+      <button type="submit" disabled={submitting}>
+        {submitting ? "Creating..." : "Create Meeting"}
+      </button>
     </form>
   );
 }
