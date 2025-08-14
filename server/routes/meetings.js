@@ -19,4 +19,10 @@ router.get('/', getMeetingsForUser);
 // POST /api/meetings/:meetingId/respond - Respond to invitation
 router.post('/:meetingId/respond', respondToInvitation);
 
+// Archive past meetings (e.g., admin or scheduled task)
+router.post('/archive-past', archivePastMeetings);
+
+// Get archived meetings for user
+router.get('/archived', getArchivedMeetings);
+
 module.exports = router;

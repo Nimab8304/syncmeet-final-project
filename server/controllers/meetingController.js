@@ -79,6 +79,35 @@ const respondToInvitation = async (req, res) => {
   }
 };
 
+const archivePastMeetings = async (req, res) => {
+  try {
+    const now = new Date();
+    const result = await Meeting.updateMany(
+      { endTime: { $lt: now }, archived: false },
+      { $set: { archived: true } }
+    );
+
+    res.json({ message: `${result.modifiedCount} meetings archived.` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getArchivedMeetings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const meetings = await Meeting.find({
+      archived: true,
+      $or: [{ createdBy: userId }, { 'participants.user': userId }],
+    }).sort({ startTime: -1 });
+
+    res.json(meetings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   createMeeting,
   getMeetingsForUser,
