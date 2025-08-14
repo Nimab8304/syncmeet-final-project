@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import Spinner from '../ui/Spinner';
 
 export default function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -14,33 +16,54 @@ export default function LoginForm({ onLogin }) {
       return;
     }
 
-    // Call onLogin handler passed from parent for API call and further processing
-    onLogin({ email, password });
+    try {
+      setSubmitting(true);
+      await onLogin({
+        email,
+        password,
+        onResult: ({ ok, message }) => {
+          if (!ok) setError(message || 'Login failed');
+        },
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <form onSubmit={handleSubmit} aria-label="Login form">
+      <h2 className="section-title">Login</h2>
+      {error && <p style={{ color: '#dc2626', marginBottom: 8 }}>{error}</p>}
+
       <div>
-        <label>Email:</label>
+        <label htmlFor="login-email">Email</label>
         <input
+          id="login-email"
           type="email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
           required
+          disabled={submitting}
         />
       </div>
+
       <div>
-        <label>Password:</label>
+        <label htmlFor="login-password">Password</label>
         <input
+          id="login-password"
           type="password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
           required
+          disabled={submitting}
         />
       </div>
-      <button type="submit">Login</button>
+
+      <button type="submit" disabled={submitting} aria-busy={submitting}>
+        {submitting ? <Spinner size={18} color="#fff" label="" /> : 'Login'}
+      </button>
     </form>
   );
 }

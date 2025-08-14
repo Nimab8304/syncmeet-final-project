@@ -1,5 +1,5 @@
 // client/src/services/meetingService.js
-const BASE_URL = process.env.REACT_APP_API_URL || ""; // خالی در صورت داشتن proxy
+const BASE_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, ""); // trim trailing slashes
 const API = `${BASE_URL}/api/meetings`;
 
 const authHeaders = (token) => ({
@@ -27,8 +27,7 @@ async function request(path = "", { token, ...options } = {}) {
   return data;
 }
 
-export const getMeetings = (token) =>
-  request("", { token });
+export const getMeetings = (token) => request("", { token });
 
 export const createMeeting = (meeting, token) =>
   request("", { method: "POST", body: JSON.stringify(meeting), token });
@@ -40,8 +39,6 @@ export const respondToInvitation = (meetingId, response, token) =>
     token,
   });
 
-export const getArchived = (token) =>
-  request("/archived", { token });
+export const getArchived = (token) => request("/archived", { token });
 
-export const archivePast = (token) =>
-  request("/archive-past", { method: "POST", token });
+export const archivePast = (token) => request("/archive-past", { method: "POST", token });

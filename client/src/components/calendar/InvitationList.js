@@ -1,47 +1,58 @@
 // client/src/components/calendar/InvitationList.js
 import React from "react";
+import { formatLocalRange } from "../../utils/date";
+
+function StatusChip({ status }) {
+  const map = {
+    accepted: "chip success",
+    invited: "chip warning",
+    declined: "chip danger",
+  };
+  const cls = map[status] || "chip";
+  const label = status?.charAt(0).toUpperCase() + status?.slice(1);
+  return <span className={cls} style={{ marginLeft: 8 }}>{label}</span>;
+}
 
 export default function InvitationList({ invitations = [], onRespond }) {
   if (!invitations.length) {
-    return <p>No pending invitations.</p>;
+    return (
+      <div className="card">
+        <h2 className="section-title">Invitations</h2>
+        <p style={{ color: "#6b7280" }}>No pending invitations.</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2>Your Invitations</h2>
-      <ul style={{ listStyleType: "none", padding: 0 }}>
-        {invitations.map((invitation) => (
-          <li
-            key={invitation._id}
-            style={{
-              marginBottom: "1em",
-              borderBottom: "1px solid #ccc",
-              paddingBottom: "0.5em",
-            }}
-          >
-            <div>
-              <strong>{invitation.title}</strong>
-            </div>
-            <div>
-              {new Date(invitation.startTime).toLocaleString()} →{" "}
-              {new Date(invitation.endTime).toLocaleString()}
-            </div>
-            <div style={{ marginTop: "0.5em" }}>
-              <button
-                onClick={() => onRespond(invitation._id, "accepted")}
-                style={{ marginRight: "0.5em" }}
-              >
-                Accept
-              </button>
-              <button
-                onClick={() => onRespond(invitation._id, "declined")}
-                style={{ color: "red" }}
-              >
-                Decline
-              </button>
-            </div>
-          </li>
-        ))}
+    <div className="card">
+      <h2 className="section-title">Invitations</h2>
+      <ul>
+        {invitations.map((inv) => {
+          const timeRange = formatLocalRange(inv.startTime, inv.endTime);
+          return (
+            <li
+              key={inv._id}
+              style={{
+                padding: "8px 0",
+                borderBottom: "1px solid var(--border-color)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{inv.title}</div>
+                  <div style={{ color: "#6b7280", fontSize: 13 }}>{timeRange}</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {typeof inv.status === "string" && <StatusChip status={inv.status} />}
+                  <button onClick={() => onRespond(inv._id, "accepted")}>Accept</button>
+                  <button className="secondary" onClick={() => onRespond(inv._id, "declined")}>
+                    Decline
+                  </button>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
