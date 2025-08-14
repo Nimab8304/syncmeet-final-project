@@ -2,9 +2,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-// const connectDB = require('./config/db'); // فعلا کامنت باشد تا بعد
+const connectDB = require('./config/db'); // فعلا کامنت باشد تا بعد
 
 const app = express();
+
+connectDB()
 
 // Middlewares
 app.use(cors());
