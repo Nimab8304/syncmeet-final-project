@@ -7,13 +7,17 @@ const {
   updateMeeting,
   deleteMeeting,
   syncMeetingToGoogle,
-  getMeetingsForUser,
+  getMeetingsForUser,       // owner + accepted
+  getInvitationsForUser,    
   respondToInvitation,
   archivePastMeetings,
   getArchivedMeetings,
 } = require('../controllers/meetingController');
 
 router.use(authMiddleware);
+
+// Invitations feed (pending only)
+router.get('/invitations', getInvitationsForUser); 
 
 // Create a new meeting
 router.post('/', createMeeting);
@@ -27,7 +31,7 @@ router.delete('/:id', deleteMeeting);
 // Manually sync a meeting to Google (creator only)
 router.post('/:id/sync-google', syncMeetingToGoogle);
 
-// Get meetings for logged-in user (active)
+// Get meetings for logged-in user (active: owner + accepted)
 router.get('/', getMeetingsForUser);
 
 // Respond to invitation

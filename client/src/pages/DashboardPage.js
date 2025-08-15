@@ -10,6 +10,7 @@ import UpcomingList from "../components/calendar/UpcomingList";
 import { useAuth } from "../context/AuthContext";
 import {
   getMeetings,
+  getInvitations,          
   createMeeting,
   updateMeeting,
   deleteMeeting,
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const [rawMeetings, setRawMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const [invites, setInvites] = useState([]);
 
   // Modals state
   const [createOpen, setCreateOpen] = useState(false);
@@ -84,11 +86,15 @@ export default function DashboardPage() {
     setLoading(true);
     setFetchError("");
     try {
-      const meetings = await getMeetings(user.token);
+      // Load accepted/owner meetings and pending invitations in parallel
+      const [meetings, pendingInvites] = await Promise.all([
+        getMeetings(user.token),
+        getInvitations(user.token), // NEW
+      ]);
 
       const calendarEvents = meetings.map((m) => {
         const createdById =
-          typeof m.createdBy === "string" ? m.createdBy : m.createdBy?._id;
+            typeof m.createdBy === "string" ? m.createdBy : m.createdBy?._id;
         const isOwner =
           createdById && currentUserId && String(createdById) === String(currentUserId);
 
@@ -105,14 +111,15 @@ export default function DashboardPage() {
             meeting: m,
             isOwner,
             timeLabel: formatLocalRange(m.startTime, m.endTime),
-          },
+            },
         };
       });
 
       setRawMeetings(meetings);
       setEvents(calendarEvents);
+      setInvites(Array.isArray(pendingInvites) ? pendingInvites : []); // NEW
 
-      // Schedule reminders after loading
+      // Reminders only for accepted/owner meetings
       scheduleRemindersForMeetings(meetings);
     } catch (err) {
       if (err?.status === 401 || err?.status === 403) {
@@ -121,7 +128,8 @@ export default function DashboardPage() {
         setFetchError(err?.message || "Failed to load meetings");
       }
     } finally {
-      setLoading(false);
+  
+     setLoading(false);
     }
   }, [user, currentUserId, safeLogout, scheduleRemindersForMeetings]);
 
@@ -129,30 +137,10 @@ export default function DashboardPage() {
     loadMeetings();
   }, [loadMeetings]);
 
-  // Cleanup all reminders on unmount
-  useEffect(() => {
-    return () => clearAllReminders();
-  }, []);
+  // Remove the old invitations useMemo. Instead:
+  const invitations = invites; // NEW
 
-  // Invitations list: meetings where current user is a participant and status === 'invited'
-  const invitations = useMemo(() => {
-    if (!rawMeetings?.length || !currentUserId) return [];
-    return rawMeetings
-      .filter(
-        (m) =>
-          Array.isArray(m.participants) &&
-          m.participants.some((p) => String(p.user) === String(currentUserId))
-      )
-      .map((m) => {
-        const me = (m.participants || []).find(
-          (p) => String(p.user) === String(currentUserId)
-        );
-        return { ...m, status: me?.status || "invited" };
-      })
-      .filter((m) => m.status === "invited");
-  }, [rawMeetings, currentUserId]);
-
-  // Upcoming: next meetings (owner or participant) with startTime in the future
+  // Upcoming stays based on rawMeetings (owner + accepted)
   const upcoming = useMemo(() => {
     if (!rawMeetings?.length) return [];
     const now = Date.now();
