@@ -74,7 +74,7 @@ npm install
 
 ## 🔑 Environment Variables
 
-Create a `.env` file in the project root and configure:
+Create a `.env` file in the `server/` directory and configure:
 
 ```env
 PORT=5000
@@ -89,7 +89,7 @@ GOOGLE_REDIRECT_URI=http://localhost:5000/api/google-calendar/callback
 
 ---
 
-## ▶ Running the App
+## ▶ Running the App (Local Development)
 
 ```bash
 # Start backend
@@ -102,6 +102,39 @@ npm run dev
 
 Frontend: **http://localhost:5173**  
 Backend API: **http://localhost:5000**
+
+---
+
+## 🐳 Docker Deployment
+
+This project includes Docker configurations for the **server**, **client**, and **MongoDB**.  
+You can deploy the entire stack using Docker Compose without manually installing Node.js or MongoDB locally.
+
+**Steps:**
+
+```bash
+# 1. Ensure server/.env exists with production values
+#    Example:
+#    PORT=5000
+#    MONGO_URI=mongodb://mongo:27017/syncmeet
+#    JWT_SECRET=your_jwt_secret_key
+
+# 2. Build images
+docker compose build
+
+# 3. Start containers
+docker compose up -d
+
+# 4. Access:
+#    Client: http://localhost:3000
+#    Server: http://localhost:5000
+```
+
+**Notes:**
+- `nginx.conf` handles serving the React app and proxying `/api` calls to the Express server.
+- MongoDB data is persisted via a named Docker volume (`mongo_data`).
+- If using Google OAuth, place your `credentials.json` in `server/` before starting containers.
+- Remove the `version` line in `docker-compose.yml` if you want to avoid Compose warnings.
 
 ---
 

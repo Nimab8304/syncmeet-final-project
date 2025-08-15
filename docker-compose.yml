@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: syncmeet_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    container_name: syncmeet_server
+    env_file:
+      - ./server/.env
+    # If you prefer inline envs instead of env_file, it must be a mapping, e.g.:
+    # environment:
+    #   MONGO_URI: mongodb://mongo:27017/syncmeet
+    #   JWT_SECRET: replace_with_strong_secret
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    volumes:
+      - ./server/credentials.json:/app/credentials.json:ro
+
+  client:
+    build:
+      context: .
+      dockerfile: client.Dockerfile
+    container_name: syncmeet_client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo_data:
