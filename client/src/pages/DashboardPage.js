@@ -8,6 +8,8 @@ import EmptyState from "../components/ui/EmptyState";
 import InvitationList from "../components/calendar/InvitationList";
 import UpcomingList from "../components/calendar/UpcomingList";
 import { useAuth } from "../context/AuthContext";
+import useInviteResponseNotifications from "../hook/useInviteResponseNotifications";
+import Toast from "../components/ui/Toast";
 import {
   getMeetings,
   getInvitations,          
@@ -44,6 +46,8 @@ export default function DashboardPage() {
   const [detailsMeeting, setDetailsMeeting] = useState(null);
   const [detailsIsOwner, setDetailsIsOwner] = useState(false);
 
+
+  
   const currentUserId = useMemo(
     () => user?.id || user?._id || user?.userId || user?.user?.id,
     [user]
@@ -80,6 +84,13 @@ export default function DashboardPage() {
         }
       });
   }, []);
+
+  const [toast, setToast] = useState({ open: false, text: "", type: "info" });
+
+  useInviteResponseNotifications({
+    intervalMs: 10000,
+    onEvent: (txt) => setToast({ open: true, text: txt, type: "success" })
+  });
 
   const loadMeetings = useCallback(async () => {
     if (!user?.token) return;
@@ -274,6 +285,14 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      <Toast
+        open={toast.open}
+        type={toast.type}
+        onClose={() => setToast((t) => ({ ...t, open: false }))}
+      >
+        {toast.text}
+      </Toast>
+
       <div className="grid grid-2">
         {/* Left: Calendar */}
         <div>
@@ -349,3 +368,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
