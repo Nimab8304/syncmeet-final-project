@@ -18,29 +18,41 @@ export default function MeetingDetailsModal({
   onAccept,
   onDecline,
   onEdit,
-  onDelete, // optional future hook
+  onDelete,
+  onSyncGoogle, // optional
 }) {
   if (!meeting) return null;
 
   const timeLabel = formatLocalRange(meeting.startTime, meeting.endTime);
 
-  const footer = isOwner ? (
+  const ownerFooter = (
     <>
+      {onSyncGoogle && (
+        <button onClick={() => onSyncGoogle(meeting._id)}>
+          Sync to Google
+        </button>
+      )}
       {onDelete && (
-        <button className="secondary" onClick={() => onDelete(meeting._id)}>
+        <button className="secondary" onClick={() => onDelete(meeting._id)} style={{ marginLeft: 8 }}>
           Delete
         </button>
       )}
-      <button onClick={() => onEdit(meeting)}>Edit</button>
+      <button onClick={() => onEdit(meeting)} style={{ marginLeft: 8 }}>
+        Edit
+      </button>
     </>
-  ) : (
+  );
+
+  const guestFooter = (
     <>
       <button onClick={() => onAccept(meeting._id)}>Accept</button>
-      <button className="secondary" onClick={() => onDecline(meeting._id)}>
+      <button className="secondary" onClick={() => onDecline(meeting._id)} style={{ marginLeft: 8 }}>
         Decline
       </button>
     </>
   );
+
+  const footer = isOwner ? ownerFooter : guestFooter;
 
   return (
     <Modal open={open} title="Meeting details" onClose={onClose} footer={footer} width={640}>
@@ -77,7 +89,10 @@ export default function MeetingDetailsModal({
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Participants</div>
             <ul>
               {meeting.participants.map((p, idx) => {
-                const label = typeof p.user === "object" ? (p.user?.name || p.user?.email || "User") : String(p.user);
+                const label =
+                  typeof p.user === "object"
+                    ? (p.user?.name || p.user?.email || "User")
+                    : String(p.user);
                 return (
                   <li key={idx} style={{ padding: "4px 0", borderBottom: "1px dashed var(--border-color)" }}>
                     <span>{label}</span>

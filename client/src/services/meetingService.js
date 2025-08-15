@@ -1,5 +1,6 @@
 // client/src/services/meetingService.js
 import { normalizeError } from "../utils/error";
+import { getLocalTimeZone } from "../utils/tz";
 
 const BASE_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 const API = `${BASE_URL}/api/meetings`;
@@ -38,10 +39,35 @@ async function request(path = "", { token, ...options } = {}) {
   }
 }
 
+const tzHeader = (tz) => ({ "X-Timezone": tz || getLocalTimeZone() });
+
 export const getMeetings = (token) => request("", { token });
 
-export const createMeeting = (meeting, token) =>
-  request("", { method: "POST", body: JSON.stringify(meeting), token });
+export const createMeeting = (meeting, token, timeZone = getLocalTimeZone()) =>
+  request("", {
+    method: "POST",
+    body: JSON.stringify(meeting),
+    token,
+    headers: tzHeader(timeZone),
+  });
+
+export const updateMeeting = (id, updates, token, timeZone = getLocalTimeZone()) =>
+  request(`/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(updates),
+    token,
+    headers: tzHeader(timeZone),
+  });
+
+export const deleteMeeting = (id, token) =>
+  request(`/${id}`, { method: "DELETE", token });
+
+export const syncMeetingToGoogle = (id, token, timeZone = getLocalTimeZone()) =>
+  request(`/${id}/sync-google`, {
+    method: "POST",
+    token,
+    headers: tzHeader(timeZone),
+  });
 
 export const respondToInvitation = (meetingId, response, token) =>
   request(`/${meetingId}/respond`, {
@@ -52,4 +78,5 @@ export const respondToInvitation = (meetingId, response, token) =>
 
 export const getArchived = (token) => request("/archived", { token });
 
-export const archivePast = (token) => request("/archive-past", { method: "POST", token });
+export const archivePast = (token) =>
+  request("/archive-past", { method: "POST", token });

@@ -11,8 +11,10 @@ import { useAuth } from "../context/AuthContext";
 import {
   getMeetings,
   createMeeting,
+  updateMeeting,
+  deleteMeeting,
+  syncMeetingToGoogle,
   respondToInvitation,
-  // TODO: add updateMeeting, deleteMeeting if backend supports
 } from "../services/meetingService";
 import { useNavigate } from "react-router-dom";
 import { eventColorsForOwnership } from "../utils/colors";
@@ -173,6 +175,54 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSubmitMeeting = async (payload) => {
+    try {
+      if (editInit?._id) {
+        await updateMeeting(editInit._id, payload, user.token);
+        showToast("Meeting updated", "success");
+      } else {
+        await createMeeting(payload, user.token);
+        showToast("Meeting created successfully!", "success");
+      }
+      await loadMeetings();
+      setCreateOpen(false);
+      setEditInit(null);
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        safeLogout();
+      } else {
+        showToast(err.message || "Failed to save meeting", "error");
+      }
+    }
+  };
+
+  const handleDeleteMeeting = async (id) => {
+    try {
+      await deleteMeeting(id, user.token);
+      await loadMeetings();
+      setDetailsOpen(false);
+      showToast("Meeting deleted", "success");
+    } catch (err) {
+      if (err?.status === 401 || err?.status === 403) {
+        safeLogout();
+      } else {
+        showToast(err.message || "Failed to delete meeting", "error");
+      }
+    }
+  };
+
+  const handleSyncGoogle = async (id) => {
+    try {
+      await syncMeetingToGoogle(id, user.token);
+      showToast("Synced to Google Calendar", "success");
+    } catch (err) {
+      if (err?.status === 401 || err?.status === 403) {
+        safeLogout();
+      } else {
+        showToast(err.message || "Sync failed", "error");
+      }
+    }
+  };
 
   const handleRespond = async (meetingId, response) => {
     try {
@@ -209,7 +259,7 @@ export default function DashboardPage() {
   };
 
   const handleEditFromDetails = (meeting) => {
-    // Open create/edit modal with initial values (acts as edit UI until update API exists)
+    // Open create/edit modal with initial values
     setEditInit(meeting);
     setCreateOpen(true);
     setDetailsOpen(false);
@@ -265,7 +315,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right: Invitations, Upcoming, inline form (optional keep) */}
+        {/* Right: Invitations, Upcoming, inline form */}
         <div>
           <InvitationList invitations={invitations} onRespond={handleRespond} />
           <UpcomingList meetings={upcoming} limit={5} />
@@ -292,7 +342,8 @@ export default function DashboardPage() {
         onAccept={(id) => handleRespond(id, "accepted")}
         onDecline={(id) => handleRespond(id, "declined")}
         onEdit={handleEditFromDetails}
-        // onDelete={async (id) => { /* TODO: implement deleteMeeting then refresh */ }}
+        onDelete={handleDeleteMeeting}
+        onSyncGoogle={detailsIsOwner ? handleSyncGoogle : undefined}
       />
 
       {/* Create/Edit modal */}
@@ -302,10 +353,7 @@ export default function DashboardPage() {
           setCreateOpen(false);
           setEditInit(null);
         }}
-        onSubmit={async (payload) => {
-          // If you add updateMeeting API, detect editInit?._id and branch to update
-          await handleCreateMeeting(payload);
-        }}
+        onSubmit={handleSubmitMeeting}
         initialValues={editInit}
         title={editInit && editInit._id ? "Edit meeting" : "Create meeting"}
         defaultReminderMinutes={15}
