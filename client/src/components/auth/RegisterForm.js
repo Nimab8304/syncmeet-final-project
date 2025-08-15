@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import Spinner from '../ui/Spinner';
 
 export default function RegisterForm({ onRegister }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -14,43 +16,73 @@ export default function RegisterForm({ onRegister }) {
       setError('Please fill in all fields.');
       return;
     }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
 
-    // Call onRegister handler passed from parent for API call and further processing
-    onRegister({ name, email, password });
+    try {
+      setSubmitting(true);
+      await onRegister({
+        name,
+        email,
+        password,
+        onResult: ({ ok, message }) => {
+          if (!ok) setError(message || 'Registration failed');
+        },
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Register</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <form onSubmit={handleSubmit} aria-label="Registration form">
+      <h2 className="section-title">Register</h2>
+      {error && <p style={{ color: '#dc2626', marginBottom: 8 }}>{error}</p>}
+
       <div>
-        <label>Name:</label>
+        <label htmlFor="reg-name">Name</label>
         <input
+          id="reg-name"
           type="text"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
           required
+          disabled={submitting}
         />
       </div>
+
       <div>
-        <label>Email:</label>
+        <label htmlFor="reg-email">Email</label>
         <input
+          id="reg-email"
           type="email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
           required
+          disabled={submitting}
         />
       </div>
+
       <div>
-        <label>Password:</label>
+        <label htmlFor="reg-password">Password</label>
         <input
+          id="reg-password"
           type="password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
           required
+          disabled={submitting}
         />
       </div>
-      <button type="submit">Register</button>
+
+      <button type="submit" disabled={submitting} aria-busy={submitting}>
+        {submitting ? <Spinner size={18} color="#fff" label="" /> : 'Register'}
+      </button>
     </form>
   );
 }

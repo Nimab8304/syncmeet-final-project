@@ -1,0 +1,14 @@
+<svg width="520" height="240" viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg">
+  <rect width="520" height="240" rx="12" fill="#F8FAFC"/>
+  <g transform="translate(60,40)">
+    <rect width="400" height="140" rx="8" fill="#E5E7EB"/>
+    <rect x="0" y="0" width="400" height="36" rx="8" fill="#D1D5DB"/>
+    <rect x="16" y="56" width="80" height="20" rx="4" fill="#CBD5E1"/>
+    <rect x="112" y="56" width="80" height="20" rx="4" fill="#CBD5E1"/>
+    <rect x="208" y="56" width="80" height="20" rx="4" fill="#CBD5E1"/>
+    <rect x="304" y="56" width="80" height="20" rx="4" fill="#CBD5E1"/>
+  </g>
+  <text x="50%" y="78%" dominant-baseline="middle" text-anchor="middle" fill="#6B7280" font-size="16" font-family="sans-serif">
+    Your calendar is empty. Create a meeting to get started.
+  </text>
+</svg>
