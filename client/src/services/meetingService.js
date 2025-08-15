@@ -45,3 +45,5 @@ export const getArchived = (token) =>
 
 export const archivePast = (token) =>
   request("/archive-past", { method: "POST", token });
+
+export const getInvitations = (token) => request("/invitations", { token });

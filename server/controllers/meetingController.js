@@ -32,9 +32,10 @@ const getMeetingsForUser = async (req, res) => {
   try {
     const userId = req.user.id;
     const meetings = await Meeting.find({
+      archived: false,
       $or: [
         { createdBy: userId },
-        { 'participants.user': userId },
+        { 'participants.user': userId, 'participants.status': 'accepted' },
       ],
     })
     .populate('participants.user', 'name email')
@@ -78,8 +79,6 @@ const respondToInvitation = async (req, res) => {
   }
 };
 
-
-
 const archivePastMeetings = async (req, res) => {
   try {
     const now = new Date();
@@ -109,9 +108,32 @@ const getArchivedMeetings = async (req, res) => {
   }
 };
 
+const getInvitationsForUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const meetings = await Meeting.find({
+      archived: false,
+      'participants.user': userId,
+      'participants.status': 'invited',
+    })
+      .populate('participants.user', 'name email')
+      .populate('createdBy', 'name email')
+      .sort({ startTime: 1 });
+
+    return res.json(meetings);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Server error' });
+  }
+};
+
 module.exports = {
   createMeeting,
-  getMeetingsForUser,
+  updateMeeting,
+  deleteMeeting,
+  syncMeetingToGoogle,
+  getMeetingsForUser,      
+  getInvitationsForUser,   
   respondToInvitation,
   archivePastMeetings,
   getArchivedMeetings

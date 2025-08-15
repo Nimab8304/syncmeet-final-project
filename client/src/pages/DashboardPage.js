@@ -5,6 +5,7 @@ import MeetingForm from "../components/calendar/MeetingForm";
 import { useAuth } from "../context/AuthContext";
 import {
   getMeetings,
+  getInvitations,          
   createMeeting,
 } from "../services/meetingService";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
+  const [invites, setInvites] = useState([]);
 
   const safeLogout = useCallback(() => {
     if (typeof logout === "function") logout();
@@ -29,14 +31,41 @@ export default function DashboardPage() {
     setLoading(true);
     setFetchError("");
     try {
-      const meetings = await getMeetings(user.token);
-      const calendarEvents = meetings.map((m) => ({
-        id: m._id,
-        title: m.title,
-        start: m.startTime,
-        end: m.endTime,
-      }));
+      // Load accepted/owner meetings and pending invitations in parallel
+      const [meetings, pendingInvites] = await Promise.all([
+        getMeetings(user.token),
+        getInvitations(user.token), // NEW
+      ]);
+
+      const calendarEvents = meetings.map((m) => {
+        const createdById =
+            typeof m.createdBy === "string" ? m.createdBy : m.createdBy?._id;
+        const isOwner =
+          createdById && currentUserId && String(createdById) === String(currentUserId);
+
+        const colors = eventColorsForOwnership(isOwner);
+        return {
+          id: m._id,
+          title: m.title,
+          start: m.startTime,
+          end: m.endTime,
+          backgroundColor: colors.backgroundColor,
+          borderColor: colors.borderColor,
+          textColor: colors.textColor,
+          extendedProps: {
+            meeting: m,
+            isOwner,
+            timeLabel: formatLocalRange(m.startTime, m.endTime),
+            },
+        };
+      });
+
+      setRawMeetings(meetings);
       setEvents(calendarEvents);
+      setInvites(Array.isArray(pendingInvites) ? pendingInvites : []); // NEW
+
+      // Reminders only for accepted/owner meetings
+      scheduleRemindersForMeetings(meetings);
     } catch (err) {
       if (err?.status === 401 || err?.status === 403) {
         safeLogout();
@@ -44,13 +73,26 @@ export default function DashboardPage() {
         setFetchError(err?.message || "Failed to load meetings");
       }
     } finally {
-      setLoading(false);
+  
+     setLoading(false);
     }
   }, [user, safeLogout]);
 
   useEffect(() => {
     loadMeetings();
   }, [loadMeetings]);
+
+  // Remove the old invitations useMemo. Instead:
+  const invitations = invites; // NEW
+
+  // Upcoming stays based on rawMeetings (owner + accepted)
+  const upcoming = useMemo(() => {
+    if (!rawMeetings?.length) return [];
+    const now = Date.now();
+    return rawMeetings
+      .filter((m) => new Date(m.startTime).getTime() > now)
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  }, [rawMeetings]);
 
   const handleCreateMeeting = async (meetingData) => {
     try {
