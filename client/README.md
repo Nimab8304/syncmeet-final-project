@@ -1,70 +1,183 @@
-# Getting Started with Create React App
+# 📅 SyncMeet
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Smart Meeting Scheduler with Google Calendar Integration**  
+A full-stack meeting scheduling app with invitations, reminders, and Google Calendar sync.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+- 🔐 **Authentication & Authorization** — Secure JWT-based login/register with persistent sessions.
+- 📅 **Meeting Management** — Create, edit, and delete meetings with a modern interactive calendar.
+- 📩 **Invitations** — Send, accept, or decline meeting invitations.
+- ⏰ **Reminders** — Default/custom reminder times with browser notifications.
+- ☁ **Google Calendar Integration** — OAuth 2.0 authentication with automatic sync.
+- 📦 **Archive** — Store and manage past meetings.
+- 🎨 **Responsive UI** — Optimized for desktop and mobile devices.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠 Tech Stack
 
-### `npm test`
+| Layer       | Technology |
+|-------------|------------|
+| **Frontend**| React, React Router, Context API, Custom CSS |
+| **Backend** | Node.js, Express.js |
+| **Database**| MongoDB, Mongoose |
+| **Integrations** | Google Calendar API |
+| **Auth**    | JWT Authentication |
+| **Security**| Helmet, CORS, Rate Limiting |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 📂 Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+project-root/
+│
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/     # UI components
+│   │   ├── context/        # Auth and Toast providers
+│   │   ├── pages/          # Page views (Dashboard, Archive, Settings, etc.)
+│   │   ├── services/       # API service functions
+│   │   ├── utils/          # Helper functions
+│
+├── server/                 # Node.js backend
+│   ├── controllers/        # Request handlers
+│   ├── middleware/         # Auth & error handling
+│   ├── models/             # Mongoose schemas
+│   ├── routes/             # API endpoints
+│   ├── services/           # External API integrations (Google Calendar)
+│
+└── .env                    # Environment variables
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## ⚙️ Installation
 
-### `npm run eject`
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/syncmeet.git
+cd syncmeet
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# 2. Install backend dependencies
+npm install
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# 3. Install frontend dependencies
+cd client
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🔑 Environment Variables
 
-## Learn More
+Create a `.env` file in the project root and configure:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Google Calendar API
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:5000/api/google-calendar/callback
+```
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## ▶ Running the App
 
-### Analyzing the Bundle Size
+```bash
+# Start backend
+npm run dev
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# Start frontend (in another terminal)
+cd client
+npm run dev
+```
 
-### Making a Progressive Web App
+Frontend: **http://localhost:5173**  
+Backend API: **http://localhost:5000**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 📡 API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST   | `/api/users/register` | Register new user |
+| POST   | `/api/users/login` | Login user |
+| GET    | `/api/meetings` | Get meetings |
+| POST   | `/api/meetings` | Create meeting |
+| PUT    | `/api/meetings/:id` | Update meeting |
+| DELETE | `/api/meetings/:id` | Delete meeting |
+| GET    | `/api/invitations` | Get pending invitations |
+| POST   | `/api/invitations/:id/respond` | Respond to invitation |
+| GET    | `/api/google-calendar/status` | Check Google Calendar connection |
+| GET    | `/api/google-calendar/auth-url` | Get OAuth URL for Google Calendar |
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🔗 Google Calendar Flow
 
-### `npm run build` fails to minify
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant GoogleAPI
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    User->>Frontend: Click "Connect Google"
+    Frontend->>Backend: Request auth URL
+    Backend->>GoogleAPI: OAuth request
+    GoogleAPI-->>Backend: Auth URL
+    Backend-->>Frontend: Return URL
+    User->>GoogleAPI: OAuth consent
+    GoogleAPI-->>Backend: Auth code
+    Backend->>GoogleAPI: Exchange for tokens
+    Backend-->>Frontend: Connection success
+```
+
+---
+
+## 🔒 Security
+
+- **JWT authentication**
+- **Helmet** for securing HTTP headers
+- **Rate limiting** to prevent abuse
+- **CORS** configuration
+- **Mongoose validation** against injection
+
+---
+
+## 📷 Screenshots
+
+| Login Page | Dashboard | Settings |
+|------------|-----------|----------|
+| ![Login](screenshots/login.png) | ![Dashboard](screenshots/dashboard.png) | ![Settings](screenshots/settings.png) |
+
+---
+
+## 🤝 Contributing
+
+```bash
+# 1. Fork repository
+# 2. Create feature branch
+git checkout -b feature-name
+
+# 3. Commit changes
+git commit -m "Add new feature"
+
+# 4. Push and create PR
+git push origin feature-name
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** — feel free to use, modify, and distribute.
