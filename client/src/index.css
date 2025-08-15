@@ -348,3 +348,133 @@ li { list-style: none; }
   background: var(--primary-color); box-shadow:0 0 0 3px rgba(99,102,241,.15);
 }
 
+/* =========================
+   Dashboard (scoped)
+   ========================= */
+
+.dashboard {
+  padding-block: 8px 24px;
+}
+
+/* Header: عنوان + دکمه ایجاد جلسه */
+.dashboard-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 12px;
+}
+.dashboard-header h1{
+  margin:0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color:#111827;
+}
+.dashboard-header button{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff;
+  font-weight: 700;
+  cursor:pointer;
+  transition: filter .2s ease, transform .03s ease;
+}
+.dashboard-header button:hover{ filter: brightness(1.05); }
+.dashboard-header button:active{ transform: translateY(1px); }
+
+/* Grid دو ستونه (تقارن بهتر از grid-2 عمومی) */
+.dashboard .grid-2{
+  display:grid;
+  gap:16px;
+  grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
+}
+@media (max-width: 1100px){
+  .dashboard .grid-2{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ستون چپ (تقویم) */
+.dashboard-main .fc{
+  background:#fff;
+  border:1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+/* FullCalendar ریزپولیش‌ها */
+.dashboard-main .fc .fc-toolbar-title{
+  font-size: 1.05rem;
+  font-weight: 700;
+  color:#0f172a;
+}
+.dashboard-main .fc .fc-button{
+  background:#fff;
+  color:#111827;
+  border:1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.dashboard-main .fc .fc-button:hover{ background:#f3f4f6; }
+.dashboard-main .fc .fc-scrollgrid{ border-radius: 10px; overflow:hidden; }
+.dashboard-main .fc .fc-day-today{ background: #eef2ff66 !important; }
+
+/* ستون راست (ریل) */
+.dashboard-rail > .card{
+  margin-bottom: 16px;
+}
+/* بلاک “New Meeting (inline)” */
+.dashboard-rail #meeting-form{
+  margin-top: 8px;
+}
+.dashboard-rail .section-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* EmptyState در حالت بدون جلسه */
+.dashboard .empty{
+  padding: 28px;
+  border-radius: 12px;
+}
+
+/* Toast مطمئن روی همه‌چیز دیده شود (اگر Toast خودش position نداد) */
+.dashboard .toast{
+  z-index: 9999;
+}
+
+/* چیدمان آیتم‌های لیست‌ها (دعوت‌ها و نزدیک‌ها) — در صورت نبود کلاس اختصاصی در اجزای داخلی */
+.dashboard-rail ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.dashboard-rail li{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+}
+.dashboard-rail li + li{ margin-top:10px; }
+
+/* برچسب‌های وضعیت (درصورتی که از chip عمومی استفاده نمی‌شود) */
+.dashboard-rail .status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  border:1px solid var(--border-color);
+  background:#f8fafc;
+  color:#334155;
+}
+.dashboard-rail .status.success { background:#ecfdf5; color:#065f46; border-color:#10b98133; }
+.dashboard-rail .status.warning { background:#fffbeb; color:#92400e; border-color:#f59e0b33; }
+.dashboard-rail .status.danger  { background:#fef2f2; color:#991b1b; border-color:#ef444433; }
