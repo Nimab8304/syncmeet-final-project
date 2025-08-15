@@ -1,21 +1,58 @@
 import React from 'react';
 import LoginForm from '../components/auth/LoginForm';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import welcomeIllustration from '../assets/welcome-illustration.svg';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async ({ email, password }) => {
+  const handleLogin = async ({ email, password, onResult }) => {
     try {
       await login({ email, password });
-      // Redirect to dashboard or home after successful login
+      onResult?.({ ok: true });
       navigate('/dashboard');
     } catch (error) {
-      alert(error.message);
+      onResult?.({ ok: false, message: error?.message || 'Login failed' });
     }
   };
 
-  return <LoginForm onLogin={handleLogin} />;
+  return (
+    <div className="container" style={{ maxWidth: 980 }}>
+      <div className="grid grid-2" style={{ alignItems: 'stretch' }}>
+        <div className="card" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div>
+            <h1 style={{ marginBottom: 8 }}>Welcome back</h1>
+            <p style={{ color: 'var(--muted-text)', marginBottom: 16 }}>
+              Sign in to view your calendar, invitations, and upcoming meetings.
+            </p>
+            <LoginForm onLogin={handleLogin} />
+            <p style={{ marginTop: 12, fontSize: 14 }}>
+              New here? <Link to="/register">Create an account</Link>
+            </p>
+          </div>
+        </div>
+
+        <div className="card" style={{ background: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <h2 className="section-title">Why SyncMeet?</h2>
+          <ul style={{ lineHeight: 1.8, color: '#374151', marginBottom: 16 }}>
+            <li>• Fast meeting creation with invitations.</li>
+            <li>• Color‑coded calendar (owner vs participant).</li>
+            <li>• Reminders before meetings.</li>
+            <li>• Archive past meetings in one click.</li>
+            <li>• Optional Google Calendar sync.</li>
+          </ul>
+
+          <div style={{ marginTop: 'auto' }}>
+            <img
+              src={welcomeIllustration}
+              alt="Welcome to SyncMeet"
+              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

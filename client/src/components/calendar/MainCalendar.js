@@ -1,13 +1,9 @@
 // client/src/components/calendar/MainCalendar.js
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-
-// // CSS های v6 — این دو تا کار می‌کنن
-// import '@fullcalendar/core/index.css';
-// import '@fullcalendar/daygrid/index.css';
-
-
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+// import "@fullcalendar/core/index.css";
+// import "@fullcalendar/daygrid/index.css";
 
 export default function MainCalendar({
   events = [],
@@ -27,6 +23,8 @@ export default function MainCalendar({
         right: "dayGridMonth,dayGridWeek,dayGridDay",
       }}
       height="auto"
+      fixedWeekCount={false}
+      eventDisplay="block"
     />
   );
 }

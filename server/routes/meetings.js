@@ -1,3 +1,4 @@
+// server/routes/meetings.js
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
@@ -10,10 +11,9 @@ const {
   getInvitationsForUser,    
   respondToInvitation,
   archivePastMeetings,
-  getArchivedMeetings
+  getArchivedMeetings,
 } = require('../controllers/meetingController');
 
-// Protect all meeting routes
 router.use(authMiddleware);
 
 // Invitations feed (pending only)
@@ -37,7 +37,7 @@ router.get('/', getMeetingsForUser);
 // Respond to invitation
 router.post('/:meetingId/respond', respondToInvitation);
 
-// Archive past meetings (can be called by admin or scheduled job)
+// Archive past meetings
 router.post('/archive-past', archivePastMeetings);
 
 // Get archived meetings
