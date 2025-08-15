@@ -459,3 +459,80 @@ Root app container
 .dashboard-rail .status.success{ background:#ecfdf5; color:#065f46; border-color:#10b98133; }
 .dashboard-rail .status.warning{ background:#fffbeb; color:#92400e; border-color:#f59e0b33; }
 .dashboard-rail .status.danger { background:#fef2f2; color:#991b1b; border-color:#ef444433; }
+
+/* SETTINGS PAGE */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.settings-card {
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-desc {
+  color: var(--muted-text);
+  font-size: 0.95rem;
+}
+
+.settings-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-control select,
+.settings-control button {
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.google-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.expiry-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.error-text {
+  color: #dc2626;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.chip.success {
+  background: #d1fae5;
+  color: #065f46;
+}
