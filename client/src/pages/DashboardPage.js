@@ -10,6 +10,7 @@ import UpcomingList from "../components/calendar/UpcomingList";
 import { useAuth } from "../context/AuthContext";
 import useInviteResponseNotifications from "../hook/useInviteResponseNotifications";
 import Toast from "../components/ui/Toast";
+import { getPreferences } from "../services/userService";
 import {
   getMeetings,
   getInvitations,          
@@ -38,7 +39,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [invites, setInvites] = useState([]);
-
+  const [defaultReminder, setDefaultReminder] = useState(15);
   // Modals state
   const [createOpen, setCreateOpen] = useState(false);
   const [editInit, setEditInit] = useState(null);
@@ -147,6 +148,20 @@ export default function DashboardPage() {
   useEffect(() => {
     loadMeetings();
   }, [loadMeetings]);
+
+  useEffect(() => {
+    (async () => {
+      if (!user?.token) return;
+      try {
+        const prefs = await getPreferences(user.token);
+        if (typeof prefs.defaultReminderMinutes === "number") {
+          setDefaultReminder(prefs.defaultReminderMinutes);
+        }
+      } catch {
+        // ignore non-fatal
+      }
+    })();
+  }, [user]);
 
   // Remove the old invitations useMemo. Instead:
   const invitations = invites; // NEW
@@ -370,7 +385,7 @@ export default function DashboardPage() {
         onSubmit={handleSubmitMeeting}
         initialValues={editInit}
         title={editInit && editInit._id ? "Edit meeting" : "Create meeting"}
-        defaultReminderMinutes={15}
+        defaultReminderMinutes={defaultReminder}
       />
     </div>
   );

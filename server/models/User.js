@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema(
       refreshToken: { type: String },
       expiryDate: { type: Number }, // ms since epoch
     },
+
+    // NEW: user preference for default meeting reminder (minutes before start)
+    defaultReminderMinutes: { type: Number, default: 15, min: 0, max: 1440 },
   },
   { timestamps: true }
 );

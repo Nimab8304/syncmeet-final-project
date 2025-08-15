@@ -76,7 +76,7 @@ async function resolveParticipantsFromEmails(rawParticipants = []) {
 // Create a new meeting
 const createMeeting = async (req, res) => {
   try {
-    const { title, description, startTime, endTime, invitationLink, participants } = req.body;
+    const { title, description, startTime, endTime, invitationLink, participants, reminderMinutes } = req.body;
     const createdBy = req.user.id;
 
     if (!title || !startTime || !endTime) {
@@ -94,6 +94,23 @@ const createMeeting = async (req, res) => {
       return res.status(status).json({ message: e.message || 'Invalid participants' });
     }
 
+    // Figure out the default reminder if client didn't send one
+    let finalReminder = undefined;
+    if (typeof reminderMinutes === 'number') {
+      finalReminder = reminderMinutes;
+    } else {
+      try {
+        const meUser = await User.findById(createdBy).select('defaultReminderMinutes');
+        if (typeof meUser?.defaultReminderMinutes === 'number') {
+          finalReminder = meUser.defaultReminderMinutes;
+        } else {
+          finalReminder = 15; // last resort
+        }
+      } catch {
+        finalReminder = 15;
+      }
+    }
+
     const meeting = new Meeting({
       title,
       description,
@@ -102,6 +119,8 @@ const createMeeting = async (req, res) => {
       invitationLink,
       participants: sanitizeParticipants(normalizedParticipants),
       createdBy,
+      // persist reminderMinutes on the meeting if your schema supports it
+      reminderMinutes: finalReminder,
     });
 
     let savedMeeting = await meeting.save();
@@ -132,6 +151,7 @@ const createMeeting = async (req, res) => {
     return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
+
 
 // Update an existing meeting (creator only)
 const updateMeeting = async (req, res) => {

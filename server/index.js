@@ -39,6 +39,9 @@ app.use('/api/google-calendar', googleCalendarRoutes);
 const meetingRoutes = require('./routes/meetings');
 app.use('/api/meetings', meetingRoutes);
 
+const userPrefsRoutes = require('./routes/usersPrefs');
+app.use('/api/users', userPrefsRoutes);
+
 // Not found handler (before error handler)
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });

@@ -1,11 +1,18 @@
+// client/src/pages/SettingsPage.js
 import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../App";
+import { getPreferences, updatePreferences } from "../services/userService";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { showToast } = useToast?.() || { showToast: () => {} };
 
+  // User preference state
+  const [formReminder, setFormReminder] = useState(15);
+  const [savingPref, setSavingPref] = useState(false);
+
+  // Google connection status state
   const [status, setStatus] = useState({
     loading: true,
     connected: false,
@@ -15,17 +22,37 @@ export default function SettingsPage() {
   });
   const [connecting, setConnecting] = useState(false);
 
-  const authHeaders = useCallback(() => ({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${user?.token || ""}`,
-  }), [user]);
+  const authHeaders = useCallback(
+    () => ({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${user?.token || ""}`,
+    }),
+    [user]
+  );
 
-  const safeStatusError = useCallback((err) => {
-    const msg = err?.message || "Failed to fetch Google status";
-    setStatus((s) => ({ ...s, loading: false, error: msg }));
-    showToast(msg, "error");
-  }, [showToast]);
+  // Load user preferences
+  const loadPrefs = useCallback(async () => {
+    if (!user?.token) return;
+    try {
+      const prefs = await getPreferences(user.token);
+      if (typeof prefs.defaultReminderMinutes === "number") {
+        setFormReminder(prefs.defaultReminderMinutes);
+      }
+    } catch {
+      // non-fatal: ignore
+    }
+  }, [user]);
 
+  const safeStatusError = useCallback(
+    (err) => {
+      const msg = err?.message || "Failed to fetch Google status";
+      setStatus((s) => ({ ...s, loading: false, error: msg }));
+      showToast(msg, "error");
+    },
+    [showToast]
+  );
+
+  // Fetch Google connect status
   const fetchStatus = useCallback(async () => {
     if (!user?.token) {
       setStatus((s) => ({ ...s, loading: false, error: "Not authenticated" }));
@@ -64,11 +91,30 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchStatus();
-    const onFocus = () => setTimeout(fetchStatus, 100);
+    loadPrefs();
+    const onFocus = () => {
+      setTimeout(fetchStatus, 100);
+      setTimeout(loadPrefs, 150);
+    };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [fetchStatus]);
+  }, [fetchStatus, loadPrefs]);
 
+  // Save default reminder preference
+  const handleSavePref = async () => {
+    if (!user?.token) return;
+    try {
+      setSavingPref(true);
+      await updatePreferences({ defaultReminderMinutes: Number(formReminder) }, user.token);
+      showToast("Default reminder saved", "success");
+    } catch (e) {
+      showToast(e?.message || "Failed to save default reminder", "error");
+    } finally {
+      setSavingPref(false);
+    }
+  };
+
+  // Start Google OAuth connect
   const handleConnectGoogle = async () => {
     if (!user?.token) {
       showToast("Please login first.", "warning");
@@ -121,15 +167,20 @@ export default function SettingsPage() {
           Choose the default reminder for new meetings. This can be overridden per meeting.
         </p>
         <div className="settings-control">
-          <select disabled>
-            <option>15 minutes (default)</option>
-            <option>5 minutes</option>
-            <option>10 minutes</option>
-            <option>30 minutes</option>
-            <option>1 hour</option>
-            <option>None</option>
+          <select
+            value={formReminder}
+            onChange={(e) => setFormReminder(Number(e.target.value))}
+          >
+            <option value={15}>15 minutes (default)</option>
+            <option value={5}>5 minutes</option>
+            <option value={10}>10 minutes</option>
+            <option value={30}>30 minutes</option>
+            <option value={60}>1 hour</option>
+            <option value={0}>None</option>
           </select>
-          <button disabled>Save (soon)</button>
+          <button onClick={handleSavePref} disabled={savingPref}>
+            {savingPref ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
 
