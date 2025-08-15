@@ -25,8 +25,10 @@ export default function MeetingFormModal({
     startTime: "",
     endTime: "",
     invitationLink: "",
-    reminderMinutes: defaultReminderMinutes, // NEW
+    reminderMinutes: defaultReminderMinutes,
   });
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [participantsEmails, setParticipantsEmails] = useState([]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,7 +36,25 @@ export default function MeetingFormModal({
     if (open) {
       setError("");
       if (initialValues) {
-        const { title, description, startTime, endTime, invitationLink, reminderMinutes } = initialValues;
+        const {
+          title,
+          description,
+          startTime,
+          endTime,
+          invitationLink,
+          reminderMinutes,
+          participants,
+        } = initialValues;
+
+        // Pre-fill invited emails if present on populated participants
+        const initialEmails = Array.isArray(participants)
+          ? participants
+              .map((p) =>
+                typeof p.user === "object" ? (p.user?.email || null) : null
+              )
+              .filter(Boolean)
+          : [];
+
         setForm({
           title: title || "",
           description: description || "",
@@ -44,6 +64,8 @@ export default function MeetingFormModal({
           reminderMinutes:
             typeof reminderMinutes === "number" ? reminderMinutes : defaultReminderMinutes,
         });
+        setParticipantsEmails(initialEmails);
+        setInviteEmail("");
       } else {
         setForm({
           title: "",
@@ -53,6 +75,8 @@ export default function MeetingFormModal({
           invitationLink: "",
           reminderMinutes: defaultReminderMinutes,
         });
+        setParticipantsEmails([]);
+        setInviteEmail("");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,6 +88,23 @@ export default function MeetingFormModal({
       ...f,
       [name]: name === "reminderMinutes" ? Number(value) : value,
     }));
+  };
+
+  const addEmail = () => {
+    const e = (inviteEmail || "").trim().toLowerCase();
+    if (!e) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(e)) {
+      setError("Please enter a valid email.");
+      return;
+    }
+    if (participantsEmails.includes(e)) return;
+    setParticipantsEmails((prev) => [...prev, e]);
+    setInviteEmail("");
+  };
+
+  const removeEmail = (email) => {
+    setParticipantsEmails((prev) => prev.filter((x) => x !== email));
   };
 
   const handleSubmit = async () => {
@@ -86,7 +127,9 @@ export default function MeetingFormModal({
         startTime: new Date(form.startTime).toISOString(),
         endTime: new Date(form.endTime).toISOString(),
         invitationLink: form.invitationLink,
-        reminderMinutes: form.reminderMinutes, // NEW
+        reminderMinutes: form.reminderMinutes,
+        // Email-based invites: backend resolves to user IDs
+        participants: participantsEmails.map((email) => ({ email })),
       };
       await onSubmit?.(payload);
       onClose?.();
@@ -130,17 +173,75 @@ export default function MeetingFormModal({
         </div>
         <div>
           <label htmlFor="mt-link">Invitation Link</label>
-          <input id="mt-link" name="invitationLink" type="url" value={form.invitationLink} onChange={handleChange} placeholder="https://example.com/invite" />
+          <input
+            id="mt-link"
+            name="invitationLink"
+            type="url"
+            value={form.invitationLink}
+            onChange={handleChange}
+            placeholder="https://example.com/invite"
+          />
         </div>
         <div>
           <label htmlFor="mt-rem">Reminder</label>
           <select id="mt-rem" name="reminderMinutes" value={form.reminderMinutes} onChange={handleChange}>
             {REMINDER_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
           <div style={{ color: "#6b7280", fontSize: 12, marginTop: 4 }}>
             Notifications use the browser’s permission and work while the app is open.
+          </div>
+        </div>
+
+        {/* Invite by email */}
+        <div>
+          <label htmlFor="mt-invite">Invite participants (by email)</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              id="mt-invite"
+              type="email"
+              placeholder="name@example.com"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addEmail();
+                }
+              }}
+            />
+            <button type="button" className="secondary" onClick={addEmail}>
+              Add
+            </button>
+          </div>
+
+          {participantsEmails.length > 0 && (
+            <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {participantsEmails.map((em) => (
+                <span
+                  key={em}
+                  className="chip"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                >
+                  {em}
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => removeEmail(em)}
+                    style={{ padding: "2px 6px", marginLeft: 6 }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div style={{ color: "#6b7280", fontSize: 12, marginTop: 4 }}>
+            Only registered users can be invited by email.
           </div>
         </div>
       </div>

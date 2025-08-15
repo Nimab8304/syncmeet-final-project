@@ -19,6 +19,54 @@ function sanitizeParticipants(participants) {
     }));
 }
 
+// Helper: resolve any participants with { email } to { user: ObjectId }
+// - Option 2 policy: if any email does not correspond to a registered user, return 400 error.
+async function resolveParticipantsFromEmails(rawParticipants = []) {
+  if (!Array.isArray(rawParticipants) || rawParticipants.length === 0) return [];
+
+  // Split into email-based and id-based entries
+  const emails = [];
+  const idEntries = [];
+
+  for (const p of rawParticipants) {
+    if (!p) continue;
+    const email = (p.email || '').trim().toLowerCase();
+    if (email) {
+      emails.push(email);
+    } else if (p.user) {
+      idEntries.push({ user: p.user, status: p.status });
+    }
+  }
+
+  let resolved = [...idEntries];
+
+  if (emails.length > 0) {
+    const users = await User.find({ email: { $in: emails } }).select('_id email').lean();
+    const foundEmailSet = new Set((users || []).map(u => u.email));
+    const unknown = emails.filter(e => !foundEmailSet.has(e));
+
+    if (unknown.length > 0) {
+      const list = unknown.join(', ');
+      const err = new Error(`Some emails are not registered: ${list}`);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const emailToId = new Map((users || []).map(u => [u.email, u._id]));
+    for (const p of rawParticipants) {
+      const email = (p?.email || '').trim().toLowerCase();
+      if (email) {
+        const uid = emailToId.get(email);
+        if (uid) {
+          resolved.push({ user: uid, status: p.status });
+        }
+      }
+    }
+  }
+
+  return resolved;
+}
+
 // Create a new meeting
 const createMeeting = async (req, res) => {
   try {
@@ -32,13 +80,21 @@ const createMeeting = async (req, res) => {
       return res.status(400).json({ message: 'startTime must be before endTime' });
     }
 
+    let normalizedParticipants = [];
+    try {
+      normalizedParticipants = await resolveParticipantsFromEmails(participants);
+    } catch (e) {
+      const status = e.statusCode || e.status || 400;
+      return res.status(status).json({ message: e.message || 'Invalid participants' });
+    }
+
     const meeting = new Meeting({
       title,
       description,
       startTime,
       endTime,
       invitationLink,
-      participants: sanitizeParticipants(participants),
+      participants: sanitizeParticipants(normalizedParticipants),
       createdBy,
     });
 
@@ -91,9 +147,15 @@ const updateMeeting = async (req, res) => {
       }
     }
 
-    // sanitize participants if provided
-    if (updates.participants) {
-      updates.participants = sanitizeParticipants(updates.participants);
+    // Handle participants if provided: can be [{ email }] or [{ user }]
+    if (Array.isArray(updates.participants)) {
+      try {
+        const normalizedParticipants = await resolveParticipantsFromEmails(updates.participants);
+        updates.participants = sanitizeParticipants(normalizedParticipants);
+      } catch (e) {
+        const status = e.statusCode || e.status || 400;
+        return res.status(status).json({ message: e.message || 'Invalid participants' });
+      }
     }
 
     Object.assign(meeting, updates);

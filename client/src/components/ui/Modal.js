@@ -16,10 +16,12 @@ export default function Modal({
   useEffect(() => {
     if (!open) return;
     document.addEventListener("keydown", onKeyDown);
+    // prevent background scroll while modal is open
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = prevOverflow || "";
     };
   }, [open, onKeyDown]);
 
@@ -37,22 +39,39 @@ export default function Modal({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 16,
+        padding: 16,          // allows some margin on small screens
         zIndex: 10000,
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        className="modal-panel"
         style={{
-          background: "#fff",
-          borderRadius: 12,
+          // Panel sizing
           width: "100%",
           maxWidth: width,
+          maxHeight: "90vh",   // never exceed viewport height
+          overflow: "hidden",  // let inner sections manage their own scroll
+          // Layout
+          display: "flex",
+          flexDirection: "column",
+          // Visuals
+          background: "#fff",
+          borderRadius: 12,
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          overflow: "hidden",
         }}
       >
-        <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border-color)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {/* Header (fixed) */}
+        <div
+          style={{
+            padding: "14px 16px",
+            borderBottom: "1px solid var(--border-color)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flex: "0 0 auto",
+          }}
+        >
           <h3 style={{ margin: 0, fontSize: 18 }}>{title}</h3>
           <button
             onClick={onClose}
@@ -64,12 +83,32 @@ export default function Modal({
           </button>
         </div>
 
-        <div style={{ padding: 16 }}>
+        {/* Body (scrollable) */}
+        <div
+          className="modal-body-scroll"
+          style={{
+            padding: 16,
+            overflowY: "auto",
+            flex: "1 1 auto",
+            minHeight: 0,        // critical for flex children to allow scrolling
+          }}
+        >
           {children}
         </div>
 
+        {/* Footer (fixed) */}
         {footer && (
-          <div style={{ padding: 12, borderTop: "1px solid var(--border-color)", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <div
+            style={{
+              padding: 12,
+              borderTop: "1px solid var(--border-color)",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+              flex: "0 0 auto",
+              background: "#fff",
+            }}
+          >
             {footer}
           </div>
         )}
