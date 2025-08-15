@@ -29,6 +29,12 @@ async function request(path = "", { token, ...options } = {}) {
     const data = isJson ? await res.json().catch(() => ({})) : null;
 
     if (!res.ok) {
+      console.error('[meetingService.request] HTTP error', {
+        path,
+        status: res.status,
+        url: res.url,
+        body: data,
+      });
       const err = new Error(extractMessage(data, `Request failed: ${res.status}`));
       err.status = res.status;
       throw err;

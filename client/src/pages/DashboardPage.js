@@ -224,13 +224,27 @@ export default function DashboardPage() {
   };
 
   const handleRespond = async (meetingId, response) => {
+    console.log('[handleRespond] will POST', { meetingId, response, hasToken: !!user?.token });
+
     try {
       await respondToInvitation(meetingId, response, user.token);
       await loadMeetings(); // refresh and reschedule reminders
       setDetailsOpen(false);
     } catch (err) {
-      if (err?.status === 401 || err?.status === 403) {
+      // REPLACE your existing catch body with the block below
+      console.warn('[DashboardPage] action failed', {
+        where: 'handleRespond',
+        status: err?.status,
+        msg: err?.message,
+      });
+      if (err?.status === 401) {
+        // only logout on 401 (unauthenticated)
         safeLogout();
+      } else if (err?.status === 403) {
+        // do NOT logout on 403 (forbidden) — show a toast so you can debug
+        setToast({ open: true, text: err?.message || 'Forbidden', type: 'error' });
+      } else {
+        setToast({ open: true, text: err?.message || 'Error', type: 'error' });
       }
     }
   };

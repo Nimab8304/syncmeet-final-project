@@ -8,6 +8,8 @@ const participantSchema = new mongoose.Schema({
     enum: ['invited', 'accepted', 'declined'],
     default: 'invited',
   },
+  // NEW: personal Google event id for this invitee (if they accepted and are connected)
+  googleEventId: { type: String, default: null },
 });
 
 const meetingSchema = new mongoose.Schema(
@@ -20,8 +22,7 @@ const meetingSchema = new mongoose.Schema(
     participants: [participantSchema],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     archived: { type: Boolean, default: false },
-
-    // New: store the created Google event id for future updates/deletes
+    // Event id created in the OWNER's calendar
     googleEventId: { type: String, default: null },
   },
   { timestamps: true }
