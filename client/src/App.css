@@ -1,4 +1,4 @@
-/* Root app container */
+Root app container
 .App {
   text-align: center;
 }
@@ -41,6 +41,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background:
+    radial-gradient(1200px 600px at 8% 8%, #eef2ff 0%, transparent 50%),
+    radial-gradient(900px 500px at 88% 4%, #e0f2fe 0%, transparent 55%)
 }
 
 /* Constrain page content under Navbar */
@@ -135,4 +138,401 @@
 .fc .fc-scrollgrid {
   border-radius: var(--radius);
   overflow: hidden;
+}
+/* --- LOGIN PAGE ONLY (scoped) --- */
+.login-wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background:
+    radial-gradient(1200px 600px at 10% 10%, #eef2ff 0%, transparent 50%),
+    radial-gradient(1000px 500px at 90% 0%, #e0f2fe 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,.06);
+  padding: 24px;
+}
+
+/* فرمِ داخل کارت لاگین – باکس سفید عمومی را خنثی کن */
+.login-card form {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* لیبل‌ها و ورودی‌ها – حتی اگر LoginForm کلاس ندهد */
+.login-card label{
+  display:block;
+  font-size:13px;
+  color:#334155;
+  margin: 0 0 6px 2px;
+}
+
+.login-card input[type="email"],
+.login-card input[type="text"],
+.login-card input[type="password"]{
+  width:100%;
+  height:42px;
+  border-radius:10px;
+  border:1px solid var(--border-color);
+  background:#fff;
+  padding:0 12px;
+  font-size:14px;
+  margin-bottom:12px;
+  transition: box-shadow .2s, border-color .2s, transform .02s;
+}
+
+.login-card input[type="email"]:focus,
+.login-card input[type="text"]:focus,
+.login-card input[type="password"]:focus{
+  outline:none;
+  border-color:#6366f1;
+  box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+
+/* دکمه – اگر type مشخص نیست هر دو را پوشش بده */
+.login-card button,
+.login-card input[type="submit"]{
+  width:100%;
+  height:44px;
+  border:0;
+  border-radius:10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff;
+  font-weight:700;
+  letter-spacing:.2px;
+  cursor:pointer;
+  transition: transform .03s ease, filter .2s ease;
+}
+.login-card button:hover,
+.login-card input[type="submit"]:hover{ filter:brightness(1.05); }
+.login-card button:active,
+.login-card input[type="submit"]:active{ transform:translateY(1px); }
+
+.login-title{ font-size:28px; font-weight:800; margin:0 0 6px 0; color:#0f172a; }
+.login-sub{ margin:0 0 16px 0; color:var(--muted-text); }
+.login-footer{ margin-top:12px; font-size:14px; color:var(--muted-text); }
+.login-footer a{ color:var(--primary-color); text-decoration:none; }
+.login-footer a:hover{ text-decoration:underline; }
+
+
+/* ============ Register Page (scoped) ============ */
+
+/* صفحه و چیدمان دو ستونه */
+.register-wrap{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:32px 16px;
+  background:
+    radial-gradient(1200px 600px at 12% 12%, #eef2ff 0%, transparent 50%),
+    radial-gradient(1000px 500px at 88% 0%, #e0f2fe 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.register-grid{
+  display:grid;
+  gap:24px;
+  align-items:center;
+  grid-template-columns: minmax(340px, 480px) minmax(0, 1fr);
+}
+@media (max-width: 960px){
+  .register-grid{ grid-template-columns:1fr; gap:16px; }
+}
+
+/* کارت شیشه‌ای فرم ثبت‌نام */
+.register-card{
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,.06);
+  padding: 24px;
+}
+.register-title{ font-size:28px; font-weight:800; letter-spacing:-.02em; margin:0 0 6px; color:#0f172a; }
+.register-sub{ margin:0 0 16px; color: var(--muted-text); }
+.register-footer{ margin-top:12px; font-size:14px; color: var(--muted-text); }
+.register-footer a{ color: var(--primary-color); text-decoration:none; }
+.register-footer a:hover{ text-decoration:underline; }
+
+/* فرم داخل کارت: خنثی‌کردن rule سراسری form (اگر داری) */
+.register-card form{ background:transparent; padding:0; border-radius:0; box-shadow:none; }
+
+/* ورودی‌ها و دکمه داخل کارت—even اگر RegisterForm کلاس ندهد */
+.register-card label{
+  display:block; font-size:13px; color:#334155; margin:0 0 6px 2px;
+}
+.register-card input[type="text"],
+.register-card input[type="email"],
+.register-card input[type="password"]{
+  width:100%; height:42px; border-radius:10px; border:1px solid var(--border-color);
+  background:#fff; padding:0 12px; font-size:14px; margin-bottom:12px;
+  transition: box-shadow .2s, border-color .2s, transform .02s;
+}
+.register-card input[type="text"]:focus,
+.register-card input[type="email"]:focus,
+.register-card input[type="password"]:focus{
+  outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+.register-card button,
+.register-card input[type="submit"]{
+  width:100%; height:44px; border:0; border-radius:10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff; font-weight:700; letter-spacing:.2px; cursor:pointer;
+  transition: transform .03s ease, filter .2s ease;
+}
+.register-card button:hover,
+.register-card input[type="submit"]:hover{ filter:brightness(1.05); }
+.register-card button:active,
+.register-card input[type="submit"]:active{ transform:translateY(1px); }
+
+/* ستون مزایا */
+.register-hero{
+  background:
+    radial-gradient(600px 300px at 85% 10%, #eef2ff 0%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius:16px;
+  border:1px solid var(--border-color);
+  box-shadow: 0 8px 30px rgba(2,6,23,.04);
+  padding:24px;
+  display:flex; flex-direction:column;
+}
+.register-hero-list{
+  list-style:none; margin:0; padding:0;
+}
+.register-hero-list li{
+  position:relative; padding-left:22px; margin:8px 0; color:#374151;
+}
+.register-hero-list li::before{
+  content:""; position:absolute; left:0; top:10px; width:8px; height:8px; border-radius:50%;
+  background: var(--primary-color); box-shadow:0 0 0 3px rgba(99,102,241,.15);
+}
+
+
+/* =========================================
+   DASHBOARD ✨  (Scoped to .dashboard)
+   ========================================= */
+
+/* پس‌زمینه لطیف صفحه داشبورد */
+.dashboard {
+  padding-block: 16px 28px;
+}
+
+/* هدر: عنوان + دکمه ایجاد */
+.dashboard-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom: 18px;
+}
+.dashboard-header h1{
+  margin:0; font-size:24px; font-weight:900; letter-spacing:-.02em; color:#0f172a;
+  text-shadow: 0 1px 0 rgba(15, 23, 42, .04);
+}
+.dashboard-header button{
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--border-color), #6366f1 25%);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff; font-weight:800; letter-spacing:.2px;
+  box-shadow: 0 10px 18px -8px rgba(99,102,241,.55);
+  cursor:pointer;
+  transition: transform .06s ease, filter .2s ease, box-shadow .2s ease;
+}
+.dashboard-header button:hover{ filter:brightness(1.06); box-shadow: 0 14px 22px -10px rgba(99,102,241,.6); }
+.dashboard-header button:active{ transform: translateY(1px) scale(.99); }
+
+/* گرید اصلی */
+.dashboard .grid-2{
+  display:grid; gap:18px;
+  grid-template-columns: minmax(0, 2.05fr) minmax(320px, 1fr);
+}
+@media (max-width: 1120px){ .dashboard .grid-2{ grid-template-columns:1fr; } }
+
+/* کارت شیشه‌ای عمومی برای این صفحه */
+.dashboard .card{
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.06);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: saturate(150%) blur(6px);
+  box-shadow: 0 12px 30px rgba(2,6,23,.06);
+}
+
+/* تقویم داخل کارت شیشه‌ای */
+.dashboard-main .fc{
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.06);
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(4px);
+  padding: 10px;
+  box-shadow: 0 12px 30px rgba(2,6,23,.06);
+}
+/* پالش‌های FullCalendar */
+.dashboard-main .fc .fc-toolbar-title{
+  font-size: 1.08rem; font-weight: 800; color:#0f172a;
+}
+.dashboard-main .fc .fc-button{
+  background:#fff; color:#111827;
+  border:1px solid var(--border-color);
+  border-radius:10px; padding:6px 12px;
+  transition: background-color .15s ease, transform .03s ease;
+}
+.dashboard-main .fc .fc-button:hover{ background:#f3f4f6; }
+.dashboard-main .fc .fc-button:active{ transform: translateY(1px); }
+.dashboard-main .fc .fc-scrollgrid{ border-radius: 12px; overflow: hidden; }
+.dashboard-main .fc .fc-day-today{ background: #eef2ff80 !important; }
+.dashboard-main .fc .fc-daygrid-day:hover{
+  background: #fafafa;
+  transition: background-color .15s ease;
+}
+
+/* ریل راست: sticky برای UX بهتر */
+.dashboard-rail{
+  position: sticky; top: 86px;
+  height: fit-content;
+}
+.dashboard-rail > .card{ padding: 14px; }
+.dashboard-rail > .card + .card{ margin-top: 16px; }
+
+/* تیترهای ریل */
+.dashboard-rail .section-title{
+  display:flex; align-items:center; gap:8px;
+  font-weight: 800; letter-spacing: -.01em;
+}
+
+/* فرم اینلاین: ورودی‌ها نرم، تمرکز حرفه‌ای */
+.dashboard-rail input,
+.dashboard-rail textarea{
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background:#fff;
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+.dashboard-rail input:focus,
+.dashboard-rail textarea:focus{
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99,102,241,.14);
+}
+
+/* Empty state */
+.dashboard .empty{
+  padding: 30px;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in oklab, var(--border-color), #6366f1 15%);
+  background: rgba(255,255,255,.9);
+}
+
+/* لیست‌های دعوت/رویدادهای آینده (fallback در صورت نبود کلاس داخلی) */
+.dashboard-rail ul{ list-style:none; margin:0; padding:0; }
+.dashboard-rail li{
+  display:flex; flex-direction:column; gap:6px;
+  border:1px solid rgba(15,23,42,.06);
+  border-radius:12px;
+  padding:12px 14px;
+  background: linear-gradient(180deg, #fff, #fafafa);
+  box-shadow: 0 8px 22px rgba(2,6,23,.04);
+  transition: transform .05s ease, box-shadow .2s ease;
+}
+.dashboard-rail li + li{ margin-top:10px; }
+.dashboard-rail li:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(2,6,23,.06);
+}
+
+/* چیپ‌های وضعیت اگر استفاده می‌کنی */
+.dashboard-rail .status{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:2px 8px; border-radius:999px; font-size:12px;
+  border:1px solid var(--border-color); background:#f8fafc; color:#334155;
+}
+.dashboard-rail .status.success{ background:#ecfdf5; color:#065f46; border-color:#10b98133; }
+.dashboard-rail .status.warning{ background:#fffbeb; color:#92400e; border-color:#f59e0b33; }
+.dashboard-rail .status.danger { background:#fef2f2; color:#991b1b; border-color:#ef444433; }
+
+/* SETTINGS PAGE */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.settings-card {
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-desc {
+  color: var(--muted-text);
+  font-size: 0.95rem;
+}
+
+.settings-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-control select,
+.settings-control button {
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.google-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.expiry-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.error-text {
+  color: #dc2626;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.chip.success {
+  background: #d1fae5;
+  color: #065f46;
 }

@@ -97,12 +97,12 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* Forms */
-form {
+/* form {
   background: white;
   padding: 1rem;
   border-radius: var(--radius);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
+} */
 
 /* Calendar container */
 .fc {
@@ -159,3 +159,322 @@ li { list-style: none; }
 /* Toast and spinner helpers (match components) */
 .toast { border-radius: 10px; }
 .spinner { display: inline-flex; align-items: center; gap: 10px; }
+
+/* === Layout اختصاصی لاگین (متقارن و ریسپانسیو) === */
+.login-grid{
+  display:grid;
+  gap:24px;
+  align-items:center; /* هر دو ستون وسط عمودی */
+  grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
+}
+@media (max-width: 960px){
+  .login-grid{ grid-template-columns: 1fr; gap:16px; }
+}
+
+/* کارت شیشه‌ای فرم لاگین (بدون استفاده از .card عمومی) */
+.login-card{
+  width:100%;
+  max-width:440px;
+  margin:0 auto;
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,.06);
+  padding: 24px;
+}
+.login-title{ font-size:28px; font-weight:800; letter-spacing:-.02em; margin:0 0 6px 0; color:#0f172a; }
+.login-sub{ margin:0 0 16px 0; color:var(--muted-text); }
+.login-footer{ margin-top:12px; font-size:14px; color:var(--muted-text); }
+.login-footer a{ color:var(--primary-color); text-decoration:none; }
+.login-footer a:hover{ text-decoration:underline; }
+
+/* فرم داخل کارت: خنثی‌کردن rule سراسری form */
+.login-card form{ background:transparent; padding:0; border-radius:0; box-shadow:none; }
+
+/* ورودی‌ها و دکمه داخل کارت—even بدون کلاس‌های سفارشی در LoginForm */
+.login-card label{
+  display:block; font-size:13px; color:#334155; margin:0 0 6px 2px;
+}
+.login-card input[type="email"],
+.login-card input[type="text"],
+.login-card input[type="password"]{
+  width:100%; height:42px; border-radius:10px; border:1px solid var(--border-color);
+  background:#fff; padding:0 12px; font-size:14px; margin-bottom:12px;
+  transition: box-shadow .2s, border-color .2s, transform .02s;
+}
+.login-card input[type="email"]:focus,
+.login-card input[type="text"]:focus,
+.login-card input[type="password"]:focus{
+  outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+.login-card button,
+.login-card input[type="submit"]{
+  width:100%; height:44px; border:0; border-radius:10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff; font-weight:700; letter-spacing:.2px;
+  cursor:pointer; transition: transform .03s ease, filter .2s ease;
+}
+.login-card button:hover,
+.login-card input[type="submit"]:hover{ filter:brightness(1.05); }
+.login-card button:active,
+.login-card input[type="submit"]:active{ transform:translateY(1px); }
+
+/* ستون راست (هرو): پس‌زمینه‌ی لطیف + لیست با بولت‌های تمیز + تصویر */
+.login-hero{
+  background:
+    radial-gradient(600px 300px at 85% 10%, #eef2ff 0%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius:16px;
+  border:1px solid var(--border-color);
+  box-shadow: 0 8px 30px rgba(2,6,23,.04);
+  padding:24px;
+  display:flex; flex-direction:column;
+}
+.login-hero-list{
+  list-style:none; margin:0 0 16px 0; padding:0;
+}
+.login-hero-list li{
+  position:relative; padding-left:22px; margin:8px 0; color:#374151;
+}
+.login-hero-list li::before{
+  content:""; position:absolute; left:0; top:10px; width:8px; height:8px; border-radius:50%;
+  background: var(--primary-color); box-shadow:0 0 0 3px rgba(99,102,241,.15);
+}
+.login-hero-ill{
+  margin-top:auto; width:100%; height:auto; border-radius:12px; user-select:none;
+}
+
+/* پس‌زمینه‌ی صفحه لاگین (wrap) */
+.login-wrap{
+  min-height:100dvh; display:grid; place-items:center; padding:32px 16px;
+  background:
+    radial-gradient(1200px 600px at 10% 10%, #eef2ff 0%, transparent 50%),
+    radial-gradient(1000px 500px at 90% 0%, #e0f2fe 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* ============ Register Page (scoped) ============ */
+
+/* صفحه و چیدمان دو ستونه */
+.register-wrap{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:32px 16px;
+  background:
+    radial-gradient(1200px 600px at 12% 12%, #eef2ff 0%, transparent 50%),
+    radial-gradient(1000px 500px at 88% 0%, #e0f2fe 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.register-grid{
+  display:grid;
+  gap:24px;
+  align-items:center;
+  grid-template-columns: minmax(340px, 480px) minmax(0, 1fr);
+}
+@media (max-width: 960px){
+  .register-grid{ grid-template-columns:1fr; gap:16px; }
+}
+
+/* کارت شیشه‌ای فرم ثبت‌نام */
+.register-card{
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  backdrop-filter: saturate(140%) blur(6px);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2,6,23,.06);
+  padding: 24px;
+}
+.register-title{ font-size:28px; font-weight:800; letter-spacing:-.02em; margin:0 0 6px; color:#0f172a; }
+.register-sub{ margin:0 0 16px; color: var(--muted-text); }
+.register-footer{ margin-top:12px; font-size:14px; color: var(--muted-text); }
+.register-footer a{ color: var(--primary-color); text-decoration:none; }
+.register-footer a:hover{ text-decoration:underline; }
+
+/* فرم داخل کارت: خنثی‌کردن rule سراسری form (اگر داری) */
+.register-card form{ background:transparent; padding:0; border-radius:0; box-shadow:none; }
+
+/* ورودی‌ها و دکمه داخل کارت—even اگر RegisterForm کلاس ندهد */
+.register-card label{
+  display:block; font-size:13px; color:#334155; margin:0 0 6px 2px;
+}
+.register-card input[type="text"],
+.register-card input[type="email"],
+.register-card input[type="password"]{
+  width:100%; height:42px; border-radius:10px; border:1px solid var(--border-color);
+  background:#fff; padding:0 12px; font-size:14px; margin-bottom:12px;
+  transition: box-shadow .2s, border-color .2s, transform .02s;
+}
+.register-card input[type="text"]:focus,
+.register-card input[type="email"]:focus,
+.register-card input[type="password"]:focus{
+  outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+.register-card button,
+.register-card input[type="submit"]{
+  width:100%; height:44px; border:0; border-radius:10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff; font-weight:700; letter-spacing:.2px; cursor:pointer;
+  transition: transform .03s ease, filter .2s ease;
+}
+.register-card button:hover,
+.register-card input[type="submit"]:hover{ filter:brightness(1.05); }
+.register-card button:active,
+.register-card input[type="submit"]:active{ transform:translateY(1px); }
+
+/* ستون مزایا */
+.register-hero{
+  background:
+    radial-gradient(600px 300px at 85% 10%, #eef2ff 0%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius:16px;
+  border:1px solid var(--border-color);
+  box-shadow: 0 8px 30px rgba(2,6,23,.04);
+  padding:24px;
+  display:flex; flex-direction:column;
+}
+.register-hero-list{
+  list-style:none; margin:0; padding:0;
+}
+.register-hero-list li{
+  position:relative; padding-left:22px; margin:8px 0; color:#374151;
+}
+.register-hero-list li::before{
+  content:""; position:absolute; left:0; top:10px; width:8px; height:8px; border-radius:50%;
+  background: var(--primary-color); box-shadow:0 0 0 3px rgba(99,102,241,.15);
+}
+
+/* =========================
+   Dashboard (scoped)
+   ========================= */
+
+.dashboard {
+  padding-block: 8px 24px;
+}
+
+/* Header: عنوان + دکمه ایجاد جلسه */
+.dashboard-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 12px;
+}
+.dashboard-header h1{
+  margin:0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color:#111827;
+}
+.dashboard-header button{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color:#fff;
+  font-weight: 700;
+  cursor:pointer;
+  transition: filter .2s ease, transform .03s ease;
+}
+.dashboard-header button:hover{ filter: brightness(1.05); }
+.dashboard-header button:active{ transform: translateY(1px); }
+
+/* Grid دو ستونه (تقارن بهتر از grid-2 عمومی) */
+.dashboard .grid-2{
+  display:grid;
+  gap:16px;
+  grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
+}
+@media (max-width: 1100px){
+  .dashboard .grid-2{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ستون چپ (تقویم) */
+.dashboard-main .fc{
+  background:#fff;
+  border:1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+/* FullCalendar ریزپولیش‌ها */
+.dashboard-main .fc .fc-toolbar-title{
+  font-size: 1.05rem;
+  font-weight: 700;
+  color:#0f172a;
+}
+.dashboard-main .fc .fc-button{
+  background:#fff;
+  color:#111827;
+  border:1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.dashboard-main .fc .fc-button:hover{ background:#f3f4f6; }
+.dashboard-main .fc .fc-scrollgrid{ border-radius: 10px; overflow:hidden; }
+.dashboard-main .fc .fc-day-today{ background: #eef2ff66 !important; }
+
+/* ستون راست (ریل) */
+.dashboard-rail > .card{
+  margin-bottom: 16px;
+}
+/* بلاک “New Meeting (inline)” */
+.dashboard-rail #meeting-form{
+  margin-top: 8px;
+}
+.dashboard-rail .section-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* EmptyState در حالت بدون جلسه */
+.dashboard .empty{
+  padding: 28px;
+  border-radius: 12px;
+}
+
+/* Toast مطمئن روی همه‌چیز دیده شود (اگر Toast خودش position نداد) */
+.dashboard .toast{
+  z-index: 9999;
+}
+
+/* چیدمان آیتم‌های لیست‌ها (دعوت‌ها و نزدیک‌ها) — در صورت نبود کلاس اختصاصی در اجزای داخلی */
+.dashboard-rail ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.dashboard-rail li{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  border:1px solid var(--border-color);
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+}
+.dashboard-rail li + li{ margin-top:10px; }
+
+/* برچسب‌های وضعیت (درصورتی که از chip عمومی استفاده نمی‌شود) */
+.dashboard-rail .status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  border:1px solid var(--border-color);
+  background:#f8fafc;
+  color:#334155;
+}
+.dashboard-rail .status.success { background:#ecfdf5; color:#065f46; border-color:#10b98133; }
+.dashboard-rail .status.warning { background:#fffbeb; color:#92400e; border-color:#f59e0b33; }
+.dashboard-rail .status.danger  { background:#fef2f2; color:#991b1b; border-color:#ef444433; }

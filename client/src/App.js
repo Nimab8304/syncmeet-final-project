@@ -15,6 +15,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ArchivePage from "./pages/ArchivePage";
 import Navbar from "./components/layout/Navbar";
 import Toast from "./components/ui/Toast";
+import "./App.css";
 
 // Lazy Settings page (expects ./pages/SettingsPage to export default)
 const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));

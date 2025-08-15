@@ -265,15 +265,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="container">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
+    <div className="dashboard container">
+      <div className="dashboard-header">
         <h1 style={{ marginBottom: 12 }}>Dashboard</h1>
         <button
           onClick={() => {
@@ -295,7 +288,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-2">
         {/* Left: Calendar */}
-        <div>
+        <div className="dashboard-main">
           {loading ? (
             <div>Loading calendar...</div>
           ) : fetchError ? (
@@ -323,7 +316,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right: Invitations, Upcoming, inline form */}
-        <div>
+        <div className="dashboard-rail">
           <InvitationList invitations={invitations} onRespond={handleRespond} />
           <UpcomingList meetings={upcoming} limit={5} />
 
