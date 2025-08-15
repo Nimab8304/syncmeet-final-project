@@ -376,24 +376,6 @@ const getInvitationsForUser = async (req, res) => {
   }
 };
 
-const getInvitationsForUser = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const meetings = await Meeting.find({
-      archived: false,
-      'participants.user': userId,
-      'participants.status': 'invited',
-    })
-      .populate('participants.user', 'name email')
-      .populate('createdBy', 'name email')
-      .sort({ startTime: 1 });
-
-    return res.json(meetings);
-  } catch (error) {
-    return res.status(500).json({ message: error.message || 'Server error' });
-  }
-};
 
 module.exports = {
   createMeeting,
